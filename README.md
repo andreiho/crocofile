@@ -19,7 +19,7 @@ Install bower dependencies:
 bower install
 ```
 
-Install javascript librarias via bower:
+Install javascript libraries via bower:
 
 ```
 bower install -S libraryname
