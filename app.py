@@ -1,4 +1,6 @@
 from flask import Flask
+from flask.ext.bower import Bower
+
 app = Flask(__name__)
 
 
@@ -8,3 +10,5 @@ def hello():
 
 if __name__ == '__main__':
     app.run()
+
+Bower(app)
