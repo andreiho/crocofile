@@ -1,3 +1,11 @@
 body {
   margin-top: 35px;
 }
+
+.ui.horizontal.divider {
+  margin: 3rem 0;
+}
+
+.ui.segment {
+  padding: 3em;
+}
