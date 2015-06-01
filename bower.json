@@ -1,0 +1,21 @@
+{
+  "name": "crocofile",
+  "version": "0.1",
+  "homepage": "https://github.com/andreiho/crocofile",
+  "authors": [
+    "Andrei Horodinca <andrei.horodinca@gmail.com>"
+  ],
+  "description": "Secure file-sharing service.",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~2.1.4",
+    "semantic-ui": "~1.12.3"
+  }
+}
