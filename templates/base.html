@@ -8,9 +8,32 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
 
 <script src="{{ url_for('static', filename='bower_components/jquery/dist/jquery.min.js') }}"></script>
+<script src="{{ url_for('static', filename='bower_components/semantic-ui/dist/semantic.min.js') }}"></script>
 
 <div class="page">
- <h1>crocofile</h1>
+  <div class="ui grid">
+    <div class="row">
+      <div class="ui inverted fixed menu navbar page grid">
+        <a href="" class="brand item">crocofile</a>
+        <div class="right menu">
+          <a href="" class="item">Vault</a>
+          <a href="" class="item">Login</a>
+        </div>
+      </div>
+    </div>
+  </div>
 
- {% block body %}{% endblock %}
+  <div class="ui page grid main">
+    {% for message in get_flashed_messages() %}
+    <div class="row">
+      <div class="column padding-reset">
+        <div class="ui error message">
+          <p>{{ message }}</p>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% block body %}{% endblock %}
 </div>
