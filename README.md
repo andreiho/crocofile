@@ -13,15 +13,21 @@ Contributors
 Development Tasks
 ------------------------
 
-After installing modules via pip run:
+Install bower dependencies:
+
 ```
-pip freeze > requirements.txt
+bower install
 ```
 
 Install javascript librarias via bower:
 
 ```
 bower install -S libraryname
+```
+
+After installing modules via pip run:
+```
+pip freeze > requirements.txt
 ```
 
 Run the app:
