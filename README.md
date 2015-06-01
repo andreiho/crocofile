@@ -10,7 +10,7 @@ Contributors
 * [andreiho](https://github.com/andreiho)
 * [jsc](https://github.com/skovsgaard/)
 
-Development Tasks
+Getting the project set up
 ------------------------
 
 Install bower dependencies:
@@ -18,6 +18,15 @@ Install bower dependencies:
 ```
 bower install
 ```
+
+Install pip modules:
+
+```
+pip install -r requirements.txt
+```
+
+Common development tasks
+------------------------
 
 Install javascript libraries via bower:
 
