@@ -123,6 +123,38 @@ def login():
         return redirect(url_for('index'))
 
     return render_template('login.html', error=error)
+
+@app.route('/registration', methods=['GET', 'POST'])
+def registration():
+    error = None
+
+    if request.method == 'POST':
+        username = request.form['username'].strip()
+        password = request.form['password'].strip()
+        password_repeat = request.form['password-repeat'].strip()
+
+        user = fetch_user_by_username(username)
+        if (user):
+            error = "This username exists already."
+            return render_template('registration.html', error=error)
+        
+        if (password != password_repeat):
+            error = "Passwords do not match."
+            return render_template('registration.html', error=error)
+
+        if (len(password) < 10):
+            error = "Passwords must be at least 10 characters long"
+            return render_template('registration.html', error=error)
+
+        password = binascii.hexlify(hash_password(password)).decode('utf-8')
+        cursor.execute('INSERT INTO users (username, password) VALUES (%s, %s)', (username, password))
+        conn.commit()
+        load_all_users()
+        flash('You have been registered.')
+        return redirect(url_for('login'))
+
+    return render_template('registration.html', error=error)
+
 @app.route('/vault')
 def vault():
     return render_template("vault.html")
