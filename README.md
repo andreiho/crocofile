@@ -43,7 +43,7 @@ psql crocofile
 Create the users table:
 
 ```
-CREATE TABLE users (id SERIAL PRIMARY KEY, username varchar(30) UNIQUE not null, password varchar(60) not null, timestamp date not null default CURRENT_DATE);
+CREATE TABLE users (id SERIAL PRIMARY KEY, username varchar(30) UNIQUE not null, password varchar(600) not null, timestamp date not null default CURRENT_DATE);
 ```
 
 Common development tasks
