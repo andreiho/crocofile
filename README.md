@@ -13,6 +13,14 @@ Contributors
 Getting the project set up
 ------------------------
 
+Setup the local development environment:
+
+```
+export APP_SETTINGS="config.DevelopmentConfig"
+```
+
+Now reload your environment by running the ```workon env``` command again.
+
 Install bower dependencies:
 
 ```
