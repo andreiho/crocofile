@@ -4,25 +4,29 @@
 
 <div class="ui center aligned relaxed segment">
   <h4 class="ui disabled header">
-  Enter a strong passkey. We'll use this to encrypt your file.
+  Choose a strong passphrase or use a generated one. We recommend a 
   </h4>
 
   <div class="ui hidden divider"></div>
 
-  <div class="ui left icon action input">
-    <i class="key icon"></i>
-    <input type="text" placeholder="d1}Kv=&-nCs[">
-    <div class="ui default submit button">Generate</div>
-  </div>
+  <form enctype="multipart/form-data" class="ui form" action="{{ url_for('index') }}" method="post">
 
-  <div class="ui horizontal divider">
-    Almost there...
-  </div>
+    <div class="ui left icon action input">
+      <i class="key icon"></i>
+      <input type="text" placeholder="d1}Kv=&-nCs[" name="key">
+      <div class="ui default submit button">Generate</div>
+    </div>  
 
-  <div class="huge pink ui labeled icon button">
-    <i class="upload icon"></i>
-    Choose a file
-  </div>
+    <div class="ui horizontal divider">
+      Almost there...
+    </div>
+
+    <div class="huge pink ui labeled icon button">
+      <input type="file" placeholer="Choose a file" name="file">
+    </div>
+    <input type="submit" class="upload icon">
+
+  </form>
 </div>
 
 {% endblock %}

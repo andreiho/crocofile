@@ -9,6 +9,7 @@
 
 <script src="{{ url_for('static', filename='bower_components/jquery/dist/jquery.min.js') }}"></script>
 <script src="{{ url_for('static', filename='bower_components/semantic-ui/dist/semantic.min.js') }}"></script>
+<script src="{{ url_for('static', filename='main.js') }}"></script>
 
 <div class="page">
   <div class="ui grid">
@@ -31,9 +32,8 @@
     {% for message in get_flashed_messages() %}
     <div class="row">
       <div class="column padding-reset">
-        <div class="ui message">
-          <i class="close icon"></i>
-          <div>{{ message }}</div>
+        <div class="ui error message">
+          <p>{{ message }}</p>
         </div>
       </div>
     </div>
@@ -51,5 +51,3 @@
     </div>
   </div>
 </div>
-
-<script src="{{ url_for('static', filename='main.js') }}"></script>

@@ -1,6 +1,7 @@
 import os, psycopg2, time, sys, scrypt, random, binascii
 from flask import Flask, request, session, redirect, url_for, render_template, flash
 from flask.ext.bower import Bower
+from werkzeug import secure_filename
 
 app = Flask(__name__)
 
@@ -77,8 +78,16 @@ class UserContext():
 
 # ROUTES
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
+    if request.method == 'POST':
+        
+        file = request.files['file']
+        if file:
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            return redirect(url_for('vault', filename=filename))
+    
     return render_template("index.html")
 
 @app.route('/logout')
