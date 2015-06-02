@@ -26,7 +26,7 @@ psql crocofile
 CREATE TABLE users (id SERIAL PRIMARY KEY, username varchar(30) UNIQUE not null, password varchar(600) not null, timestamp date not null default CURRENT_DATE);
 ```
 
-**Add these lines to your *postactivate* file by running ```vi $VIRTUAL_ENV/bin/postactivate```:**
+**Add these lines to your environment:**
 
 ```
 export APP_SETTINGS="config.DevelopmentConfig"
