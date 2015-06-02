@@ -13,54 +13,58 @@ Contributors
 Getting the project set up
 ------------------------
 
-Setup the local development environment:
-
-```
-export APP_SETTINGS="config.DevelopmentConfig"
-```
-
-Now reload your environment by running the ```workon env``` command again.
-
-Install bower dependencies:
-
-```
-bower install
-```
-
-Install pip modules:
-
-```
-pip install -r requirements.txt
-```
-
-Setup and initialize the database:
+**Setup the local development environment:**
 
 ```
 createdb crocofile
 psql crocofile
 ```
 
-Create the users table:
+**Create the users table:**
 
 ```
 CREATE TABLE users (id SERIAL PRIMARY KEY, username varchar(30) UNIQUE not null, password varchar(600) not null, timestamp date not null default CURRENT_DATE);
 ```
 
+**Add these lines to your *postactivate* file by running ```vi $VIRTUAL_ENV/bin/postactivate```:**
+
+```
+export APP_SETTINGS="config.DevelopmentConfig"
+```
+
+```
+export CONN_STRING="host='localhost' dbname='crocofile' user='postgres' password='12ZellKoll8'"
+```
+
+Now reload your environment by running the ```workon env``` command again.
+
+**Install bower dependencies:**
+
+```
+bower install
+```
+
+**Install pip modules:**
+
+```
+pip install -r requirements.txt
+```
+
 Common development tasks
 ------------------------
 
-Install javascript libraries via bower:
+**Install javascript libraries via bower:**
 
 ```
 bower install -S libraryname
 ```
 
-After installing modules via pip run:
+**After installing modules via pip run:**
 ```
 pip freeze > requirements.txt
 ```
 
-Run the app:
+**Run the app:**
 
 ```
 python app.py
