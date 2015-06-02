@@ -91,6 +91,10 @@ def logout():
 def login():
     error = None
 
+    if 'logged_in' in session:
+        flash('You are already logged in.')
+        return redirect(url_for('index'))
+
     if request.method == 'POST':
             
         username = request.form['username'].strip()
@@ -134,22 +138,22 @@ def registration():
         password_repeat = request.form['password-repeat'].strip()
 
         user = fetch_user_by_username(username)
-        if (user):
+        if user:
             error = "This username exists already."
             return render_template('registration.html', error=error)
         
-        if (password != password_repeat):
+        if password != password_repeat:
             error = "Passwords do not match."
             return render_template('registration.html', error=error)
 
-        if (len(password) < 10):
+        if len(password) < 10:
             error = "Passwords must be at least 10 characters long"
             return render_template('registration.html', error=error)
 
         password = binascii.hexlify(hash_password(password)).decode('utf-8')
         cursor.execute('INSERT INTO users (username, password) VALUES (%s, %s)', (username, password))
         conn.commit()
-        load_all_users()
+        load_all_users()    
         flash('You have been registered.')
         return redirect(url_for('login'))
 
