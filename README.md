@@ -36,7 +36,7 @@ export APP_SETTINGS="config.DevelopmentConfig"
 export CONN_STRING="host='localhost' dbname='crocofile' user='yourdbuser' password='yourdbpass'"
 ```
 
-Now reload your environment by running the ```workon env``` command again.
+Now reload your environment by running the ```workon env``` or ```source yourenv/bin/activate```.
 
 **Install bower dependencies:**
 
