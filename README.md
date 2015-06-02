@@ -10,14 +10,44 @@ Contributors
 * [andreiho](https://github.com/andreiho)
 * [jsc](https://github.com/skovsgaard/)
 
-Development Tasks
+Getting the project set up
 ------------------------
+
+Setup the local development environment:
+
+```
+export APP_SETTINGS="config.DevelopmentConfig"
+```
+
+Now reload your environment by running the ```workon env``` command again.
 
 Install bower dependencies:
 
 ```
 bower install
 ```
+
+Install pip modules:
+
+```
+pip install -r requirements.txt
+```
+
+Setup and initialize the database:
+
+```
+createdb crocofile
+psql crocofile
+```
+
+Create the users table:
+
+```
+CREATE TABLE users (id SERIAL PRIMARY KEY, username varchar(30) UNIQUE not null, password varchar(600) not null, timestamp date not null default CURRENT_DATE);
+```
+
+Common development tasks
+------------------------
 
 Install javascript libraries via bower:
 
