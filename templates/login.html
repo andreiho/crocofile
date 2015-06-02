@@ -7,17 +7,15 @@
     <div class="column">
       <h4 class="ui dividing header">Login to your account</h4>
 
-       {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
-
       <form class="ui form" action="{{ url_for('login') }}" method="post">
-        <div class="field">
+        <div class="field {{ fieldError }}">
           <div class="ui left icon input">
-            <input type="text" placeholder="Username" name="username">
+            <input type="text" placeholder="Username" name="username" autofocus>
             <i class="user icon"></i>
           </div>
         </div>
 
-        <div class="field">
+        <div class="field {{ fieldError }}">
           <div class="ui left icon input">
             <input type="password" placeholder="Password" name="password">
             <i class="lock icon"></i>
@@ -30,10 +28,19 @@
           </div>
 
           <div class="right aligned column">
-            <a href="{{ url_for('registration') }}" class="ui pink basic submit button">Don't have an account?</a>
+            <a href="{{ url_for('registration') }}" class="ui pink basic submit button" style="box-shadow:none !important; padding-right: 0;">
+              Don't have an account?
+            </a>
           </div>
         </div>
       </form>
+
+      {% if error %}
+      <div class="ui small negative message">
+        <i class="close icon"></i>
+        <div>{{ error }}</div>
+      </div>
+      {% endif %}
     </div>
   </div>
 </div>

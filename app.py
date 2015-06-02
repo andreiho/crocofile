@@ -7,7 +7,7 @@ app = Flask(__name__)
 # load config
 app.config.from_object(os.environ['APP_SETTINGS'])
 
-# connect to psql db 
+# connect to psql db
 conn_string = app.config['CONN_STRING']
 
 # print the connection string
@@ -59,7 +59,7 @@ class UserContext():
         counter = self._blocked.get(ip, 0)
         counter += 1
         self._blocked[ip] = counter
-        
+
         if counter == 3:
             self._blocked_timeout[ip] = time.time() + 60
 
@@ -84,15 +84,16 @@ def index():
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)
-    flash('You were logged out')
+    flash('You were logged out.')
     return redirect('/')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
+    fieldError = None
 
     if request.method == 'POST':
-            
+
         username = request.form['username'].strip()
         password = request.form['password'].strip()
         ip = request.remote_addr
@@ -101,25 +102,26 @@ def login():
         user = fetch_user_by_username(username)
 
         if is_blocked_for_username(ip):
-            error = "Too many failed attempts"
+            error = "Too many failed attempts."
             return render_template("login.html", error=error)
 
         if not user:
             add_to_wrong_username(ip)
-            error = "Wrong username or password"
-            return render_template("login.html", error=error)
-        
+            error = "Wrong username or password."
+            fieldError = "error"
+            return render_template("login.html", error=error, fieldError=fieldError)
+
         if user.is_blocked(ip):
-            error = "Too many failed attempts"
+            error = "Too many failed attempts."
             return render_template("login.html", error=error)
-            
+
         if not user.login(password, ip):
             user.failed_login_attempt(ip)
-            error = "Wrong username or password"
+            error = "Wrong username or password."
             return render_template('login.html', error=error)
 
         session['logged_in'] = True
-        flash('You were logged in')
+        flash('You were logged in.')
         return redirect(url_for('index'))
 
     return render_template('login.html', error=error)
@@ -128,6 +130,15 @@ def login():
 def registration():
     error = None
 
+    userError = None
+    userError = None
+
+    passError = None
+    passError = None
+
+    lenError = None
+    lenError = None
+
     if request.method == 'POST':
         username = request.form['username'].strip()
         password = request.form['password'].strip()
@@ -135,16 +146,19 @@ def registration():
 
         user = fetch_user_by_username(username)
         if (user):
-            error = "This username exists already."
-            return render_template('registration.html', error=error)
-        
+            userError = "error"
+            userErrorMsg = "This username already exists."
+            return render_template('registration.html', userError=userError, userErrorMsg=userErrorMsg)
+
         if (password != password_repeat):
-            error = "Passwords do not match."
-            return render_template('registration.html', error=error)
+            passError = "error"
+            passErrorMsg = "Passwords do not match."
+            return render_template('registration.html', passError=passError, passErrorMsg=passErrorMsg)
 
         if (len(password) < 10):
-            error = "Passwords must be at least 10 characters long"
-            return render_template('registration.html', error=error)
+            lenError = "error"
+            lenErrorMsg = "Passwords must be at least 10 characters long."
+            return render_template('registration.html', lenError=lenError, lenErrorMsg=lenErrorMsg)
 
         password = binascii.hexlify(hash_password(password)).decode('utf-8')
         cursor.execute('INSERT INTO users (username, password) VALUES (%s, %s)', (username, password))
@@ -197,7 +211,7 @@ def hash_password(password, maxtime=0.5, datalength=64):
     return scrypt.encrypt(randstr(datalength), password, maxtime=maxtime)
 
 def verify_password(hashed_password, guessed_password, maxtime=0.5):
-    
+
     x = binascii.unhexlify(hashed_password)
 
     try:

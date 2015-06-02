@@ -7,28 +7,42 @@
     <div class="column">
       <h4 class="ui dividing header">Register</h4>
 
-       {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+      <form class="ui fluid form" action="{{ url_for('registration') }}" method="post">
 
-      <form class="ui form" action="{{ url_for('registration') }}" method="post">
-        <div class="field">
+        <div class="field {{ userError }}">
           <div class="ui left icon input">
-            <input type="text" placeholder="Username" name="username">
+            <input type="text" placeholder="Username" name="username" autofocus>
             <i class="user icon"></i>
           </div>
+          {% if userError %}
+          <div class="ui red pointing label">
+            {{ userErrorMsg }}
+          </div>
+          {% endif %}
         </div>
 
-        <div class="field">
+        <div class="field {{ lenError }}">
           <div class="ui left icon input">
             <input type="password" placeholder="Password" name="password">
             <i class="lock icon"></i>
           </div>
+          {% if lenError %}
+          <div class="ui red pointing label">
+            {{ lenErrorMsg }}
+          </div>
+          {% endif %}
         </div>
 
-        <div class="field">
+        <div class="field {{ passError }}">
           <div class="ui left icon input">
             <input type="password" placeholder="Repeat Password" name="password-repeat">
             <i class="lock icon"></i>
           </div>
+          {% if passError %}
+          <div class="ui red pointing label">
+            {{ passErrorMsg }}
+          </div>
+          {% endif %}
         </div>
 
         <div class="ui two column centered grid">
@@ -37,10 +51,13 @@
           </div>
 
           <div class="right aligned column">
-            <a href="{{ url_for('login') }}" class="ui pink basic submit button">Already have an account?</a>
+            <a href="{{ url_for('login') }}" class="ui pink basic submit button" style="box-shadow:none !important; padding-right: 0;">
+              Already have an account?
+            </a>
           </div>
         </div>
       </form>
+
     </div>
   </div>
 </div>
