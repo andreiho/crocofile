@@ -33,7 +33,7 @@ export APP_SETTINGS="config.DevelopmentConfig"
 ```
 
 ```
-export CONN_STRING="host='localhost' dbname='crocofile' user='postgres' password='12ZellKoll8'"
+export CONN_STRING="host='localhost' dbname='crocofile' user='yourdbuser' password='yourdbpass'"
 ```
 
 Now reload your environment by running the ```workon env``` command again.
