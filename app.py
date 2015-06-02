@@ -1,8 +1,6 @@
 from flask import Flask, request, session, g, redirect, url_for, render_template
 from flask.ext.bower import Bower
 
-SECRET_KEY = "lol"
-
 app = Flask(__name__)
 
 @app.route('/')
