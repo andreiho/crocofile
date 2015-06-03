@@ -1,0 +1,11 @@
+[x] add arbitrary filename to upload form
+[x] send chunk number with chunk -> save file with chunk number as name
+[ ] create directory per file
+[ ] use filename as directory name
+[ ] generate passphrase
+[ ] hash passphrase (create key, iv - bla)
+[ ] hash optional selected passphrase
+[ ] encrypt chunks
+[ ] optional filename encryption
+[ ] create download url
+[ ] decrypt file
