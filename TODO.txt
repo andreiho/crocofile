@@ -2,7 +2,7 @@
 [x] send chunk number with chunk -> save file with chunk number as name
 [x] create directory per file
 [x] use filename as directory name
-[ ] generate passphrase
+[x] generate passphrase
 [ ] hash passphrase (create key, iv - bla)
 [ ] hash optional selected passphrase
 [ ] encrypt chunks
@@ -11,4 +11,9 @@
 [ ] decrypt file
 [ ] add file description
 [ ] make sure filenames are unique
-[ ] save to database
+[ ] save to 
+
+
+
+
+[ ] progress bar for encryption and upload

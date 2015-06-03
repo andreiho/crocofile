@@ -85,10 +85,10 @@ $(document).ready(function(){
 	}
 	function generatePass() {
 		var wordArray = CryptoJS.lib.WordArray.random(32);
-		$('#passphrase').val(wordArray); 
+		$('#passphrase').val(CryptoJS.enc.Latin1.stringify(wordArray)); 
 	}
 	var wordArray = CryptoJS.lib.WordArray.random(32);
-	$('#passphrase').val(wordArray); 
+	$('#passphrase').val(CryptoJS.enc.Latin1.stringify(wordArray)); 
 	$('#generate').on('click', generatePass);
 	$('#upload-submit').on('click', uploadFile);
 });
