@@ -9,3 +9,7 @@ body {
 .ui.segment {
   padding: 3em;
 }
+
+.center {
+  text-align: center;
+}
