@@ -79,16 +79,23 @@ class UserContext():
 # ROUTES
 
 @app.route('/', methods=['GET', 'POST'])
-def index():
-    if request.method == 'POST':
-        
-        file = request.files['file']
-        if file:
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('vault', filename=filename))
-    
+def index():    
     return render_template("index.html")
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload():
+    if request.method == 'POST':
+    
+        binary_file = request.data
+        if binary_file:
+            filename = secure_filename("bla.png")
+            print(binary_file);
+            with open(os.path.join(app.config['UPLOAD_FOLDER'], filename), 'wb') as f:
+                f.write(binary_file)
+            return "success"
+    #        return redirect(url_for('vault', filename=filename))
+
+    return "failed"
 
 @app.route('/logout')
 def logout():

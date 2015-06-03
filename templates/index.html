@@ -4,7 +4,7 @@
 
 <div class="ui center aligned relaxed segment">
   <h4 class="ui disabled header">
-  Choose a strong passphrase or use a generated one. We recommend a 
+  Choose a strong passphrase or use the recommended generated one.
   </h4>
 
   <div class="ui hidden divider"></div>
@@ -22,11 +22,11 @@
     </div>
 
     <div class="huge pink ui labeled icon button">
-      <input type="file" placeholer="Choose a file" name="file">
+      <i type="submit" class="upload icon" id="upload-submit"></i>
+      <input type="file" placeholder="Choose a file" id="file-input">
     </div>
-    <input type="submit" class="upload icon">
-
   </form>
+  <div class="itemStatus"></div>
 </div>
 
 {% endblock %}
