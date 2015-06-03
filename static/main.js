@@ -83,6 +83,12 @@ $(document).ready(function(){
 	    $(".itemStatus").html("Upload complete. Generating URL...");
 	  }
 	}
-	$('#passphrase').val() = CryptoJS.lib.WordArray.random(32);
+	function generatePass() {
+		var wordArray = CryptoJS.lib.WordArray.random(32);
+		$('#passphrase').val(wordArray); 
+	}
+	var wordArray = CryptoJS.lib.WordArray.random(32);
+	$('#passphrase').val(wordArray); 
+	$('#generate').on('click', generatePass);
 	$('#upload-submit').on('click', uploadFile);
 });
