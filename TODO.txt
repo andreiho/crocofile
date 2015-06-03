@@ -9,3 +9,4 @@
 [ ] optional filename encryption
 [ ] create download url
 [ ] decrypt file
+[ ] add file description

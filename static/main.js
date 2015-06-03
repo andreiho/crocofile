@@ -25,6 +25,10 @@ $(document).ready(function(){
 
 	function uploadFile(){
 		var file =  $("#file-input")[0].files[0];
+		var filename = $('#filename').val();
+		if (filename.length < 1){
+			filename = file.name;
+		}
 		
 		if(!file) {
 			return window.alert("Please attach a file to share.");
@@ -34,7 +38,6 @@ $(document).ready(function(){
 		$.each(slices, function(index, value) {
 			$.ajax({
 		      url: '/upload',
-		      //server script to process data
 		      type: 'POST',
 		      xhr: function() { // custom xhr
 		        var myXhr = $.ajaxSettings.xhr();
@@ -51,9 +54,10 @@ $(document).ready(function(){
 		      // Form data
 		      headers: {
 		        'X-File-Content-Type': "application/octet-stream",
-		        'X-File-Name': file.name
+		        'X-File-Name': filename,
+		        'X-Chunk-Number': index
 		      },
-		      data: value,
+		      data: value, // binary chunk
 		      processData: false,
 		      cache: false
 		    });

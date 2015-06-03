@@ -87,10 +87,13 @@ def upload():
     if request.method == 'POST':
     
         binary_file = request.data
+        
         if binary_file:
-            filename = secure_filename("bla.png")
-            print(binary_file);
-            with open(os.path.join(app.config['UPLOAD_FOLDER'], filename), 'wb') as f:
+            chunknumber = secure_filename(request.headers['X-Chunk-Number'])
+            filename = secure_filename(request.headers['X-File-Name'])
+            if not os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], filename)):
+                os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            with open(os.path.join(app.config['UPLOAD_FOLDER'], filename, chunknumber), 'wb') as f:
                 f.write(binary_file)
             return "success"
     #        return redirect(url_for('vault', filename=filename))
