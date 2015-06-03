@@ -1,6 +1,6 @@
 <!doctype html>
 
-<title>Login Exercise</title>
+<title>crocofile - the secure file sharing service</title>
 <meta name="description" content="Secure file-sharing service.">
 <meta name="author" content="Andrei Horodinca, Sarah Braun, Jonas Christensen">
 
@@ -38,8 +38,9 @@
     {% for message in get_flashed_messages() %}
     <div class="row">
       <div class="column padding-reset">
-        <div class="ui error message">
-          <p>{{ message }}</p>
+        <div class="ui message">
+          <i class="close icon"></i>
+          <div>{{ message }}</div>
         </div>
       </div>
     </div>
