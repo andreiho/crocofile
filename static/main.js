@@ -29,11 +29,11 @@ $(document).ready(function(){
 		if (filename.length < 1){
 			filename = file.name;
 		}
-		
+
 		if(!file) {
 			return window.alert("Please attach a file to share.");
 		}
-	
+
 		var slices = sliceFile(file);
 		$.each(slices, function(index, value) {
 			$.ajax({
@@ -62,7 +62,7 @@ $(document).ready(function(){
 		      cache: false
 		    });
 		});
-	
+
 	}
 
 	function successHandler(response) {
