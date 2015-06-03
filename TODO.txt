@@ -10,3 +10,5 @@
 [ ] create download url
 [ ] decrypt file
 [ ] add file description
+[ ] make sure filenames are unique
+[ ] save to database
