@@ -1,8 +1,12 @@
+ENCRYPTION / UPLOAD
+_______________________________________________________________________
+
 [x] add arbitrary filename to upload form
 [x] send chunk number with chunk -> save file with chunk number as name
 [x] create directory per file
 [x] use filename as directory name
-[x] generate passphrase
+[/] generate passphrase
+[ ] hash file (directory) name
 [ ] hash passphrase (create key, iv - bla)
 [ ] hash optional selected passphrase
 [ ] encrypt chunks
@@ -11,9 +15,39 @@
 [ ] decrypt file
 [ ] add file description
 [ ] make sure filenames are unique
-[ ] save to 
 
 
+DECRYPTION / DOWNLOAD
+_______________________________________________________________________
 
+[ ] download link
+
+
+MESSAGING
+_______________________________________________________________________
+
+
+FRONTEND
+_______________________________________________________________________
 
 [ ] progress bar for encryption and upload
+
+
+BACKEND GENERAL
+_______________________________________________________________________
+
+[ ] csrf token
+[ ] make it work with nginx
+[ ] tls
+[ ] system and server config
+
+
+ATTACK
+_______________________________________________________________________
+
+[ ] get into wireshark
+[ ] get into burp suite 
+[ ] kali general ?
+[ ] find different attack vectors
+[ ] social engineering ("So, what are you guys doing?")
+

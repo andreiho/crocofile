@@ -22,6 +22,7 @@ var/
 .installed.cfg
 *.egg
 venv/
+file_vault/*
 
 # Installer logs
 pip-log.txt
