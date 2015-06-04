@@ -162,8 +162,9 @@ $(document).ready(function(){
 		}
 
 		var slices = sliceFile(file);
-		var passphrase = $('#passphrase').val();
-		passphrase =  CryptoJS.enc.Hex.parse(passphrase);
+		//var passphrase = $('#passphrase').val();
+		//passphrase =  CryptoJS.enc.Hex.parse(passphrase);
+		var passphrase = CryptoJS.enc.Hex.parse('000102030405060708090a0b0c0d0e0f');
 		var iv = createIV();
 		console.log("iv: " + iv);
 		console.log("passphrase: " + passphrase);
@@ -268,39 +269,37 @@ function decrypt(text1, text2, iv, passphrase) {
 	decryptedSlices.push(aesDecryptor.process(text1));
 	decryptedSlices.push(aesDecryptor.process(text2));
 	decryptedSlices.push(aesDecryptor.finalize());
+	console.log(decryptedSlices[2]);
 
-	console.log(decryptedSlices.length);
+	$.each(decryptedSlices, function(index, value) {
 
-	setTimeout(function() {
-		$.each(decryptedSlices, function(index, value) {
+		$.ajax({
+	      url: '/upload',
+	      type: 'POST',
+	      xhr: function() { // custom xhr
+	        var myXhr = $.ajaxSettings.xhr();
+	        if(myXhr.upload) { // check if upload property exists
+	          myXhr.upload.addEventListener('progress', progressHandler, false); // for handling the progress of the upload
+	        }
+	        return myXhr;
+	      },
+	      contentType: 'text/plain',
+	      //Ajax events
+	      //beforeSend: beforeSendHandler,
+	      success: successHandler,
+	      error: errorHandler,
+	      // Form data
+	      headers: {
+	        'X-File-Content-Type': "application/octet-stream",
+	        'X-File-Name': "decrypted",
+	        'X-Chunk-Number': index
+	      },
+	      data: value, // binary chunk
+	      processData: false,
+	      cache: false
+	    });
+	});
 
-			$.ajax({
-		      url: '/upload',
-		      type: 'POST',
-		      xhr: function() { // custom xhr
-		        var myXhr = $.ajaxSettings.xhr();
-		        if(myXhr.upload) { // check if upload property exists
-		          myXhr.upload.addEventListener('progress', progressHandler, false); // for handling the progress of the upload
-		        }
-		        return myXhr;
-		      },
-		      contentType: 'text/plain',
-		      //Ajax events
-		      //beforeSend: beforeSendHandler,
-		      success: successHandler,
-		      error: errorHandler,
-		      // Form data
-		      headers: {
-		        'X-File-Content-Type': "application/octet-stream",
-		        'X-File-Name': "decrypted",
-		        'X-Chunk-Number': index
-		      },
-		      data: value, // binary chunk
-		      processData: false,
-		      cache: false
-		    });
-		});
-	}, 1000);
 }
 
 	$('#passphrase').val(generatePass()); 
