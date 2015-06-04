@@ -196,6 +196,9 @@ def registration():
 def vault():
     return render_template("vault.html")
 
+@app.route('/test')
+def test():
+    return render_template("test.html")
 # ROUTES END
 
 def add_to_wrong_username(ip):
