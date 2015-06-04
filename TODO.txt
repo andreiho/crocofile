@@ -5,16 +5,18 @@ _______________________________________________________________________
 [x] send chunk number with chunk -> save file with chunk number as name
 [x] create directory per file
 [x] use filename as directory name
-[/] generate passphrase
+[x] generate passphrase
 [ ] hash file (directory) name
-[ ] hash passphrase (create key, iv - bla)
-[ ] hash optional selected passphrase
-[ ] encrypt chunks
+[x] encrypt chunks
 [ ] optional filename encryption
 [ ] create download url
 [ ] decrypt file
 [ ] add file description
 [ ] make sure filenames are unique
+[ ] save iv and download link to db
+[ ] implement encryption web workers (for upload and encryption) 
+	(see: https://github.com/STRML/securesha.re-client/blob/master/jquery-spaghetti/app/uploader.js#L139 
+	or hushfile)
 
 
 DECRYPTION / DOWNLOAD
