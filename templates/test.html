@@ -34,4 +34,47 @@
 {% endblock %}
 
 CryptoJS.enc.Hex.parse("encrypted shit")
-decryptedShit.toString(CryptoJS.enc.Latin1);   
+decryptedShit.toString(CryptoJS.enc.Latin1);
+
+function decrypt(text1, text2, iv, passphrase) {
+    var aesDecryptor = CryptoJS.algo.AES.createDecryptor(passphrase, { iv: iv });
+    var decryptedSlices = [];
+
+    console.log("encrypted wordarray:");
+    console.log(text1);
+    decryptedSlices.push(aesDecryptor.process(text1));
+    decryptedSlices.push(aesDecryptor.process(text2));
+    decryptedSlices.push(aesDecryptor.finalize());
+    
+    console.log(decryptedSlices[2]);
+
+    $.each(decryptedSlices, function(index, value) {
+
+        $.ajax({
+          url: '/upload',
+          type: 'POST',
+          xhr: function() { // custom xhr
+            var myXhr = $.ajaxSettings.xhr();
+            if(myXhr.upload) { // check if upload property exists
+              myXhr.upload.addEventListener('progress', progressHandler, false); // for handling the progress of the upload
+            }
+            return myXhr;
+          },
+          contentType: 'text/plain',
+          //Ajax events
+          //beforeSend: beforeSendHandler,
+          success: successHandler,
+          error: errorHandler,
+          // Form data
+          headers: {
+            'X-File-Content-Type': "application/octet-stream",
+            'X-File-Name': "decrypted",
+            'X-Chunk-Number': index
+          },
+          data: value, // binary chunk
+          processData: false,
+          cache: false
+        });
+    });
+
+}
