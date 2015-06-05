@@ -80,6 +80,7 @@ function encryptFile(slices, passphrase, iv) {
 						processData: false,
 						cache: false
 					});
+					
 				});
 			}
 		}
@@ -129,6 +130,12 @@ function progressHandler(e) {
 	if(e.lengthComputable) {
 		console.log("progress");
 	}
+
+	if(e.loaded != e.total){
+    $(".itemStatus").html("Uploading: " + ((e.loaded / e.total) * 100).toFixed(0) + "% complete.");
+  } else {
+    $(".itemStatus").html("Upload complete. Generating URL...");
+  }
 }
 
 
