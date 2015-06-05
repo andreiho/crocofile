@@ -23,6 +23,7 @@ var/
 *.egg
 venv/
 file_vault/*
+templates/test.html
 
 # Installer logs
 pip-log.txt
