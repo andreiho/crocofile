@@ -69,3 +69,20 @@ pip freeze > requirements.txt
 ```
 python app.py
 ```
+
+**Run the app in production**
+
+Ensure that Nginx is running, listening on port 80 and configured with the following in the `http` section of nginx.conf:
+
+```
+location / {
+  include uwsgi_params;
+  uwsgi_pass 127.0.0.1:3031;
+}
+```
+
+subsequently, run the Flask app by - when in the virtual environment:
+
+```
+uwsgi app.ini
+```
