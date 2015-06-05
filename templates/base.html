@@ -9,19 +9,8 @@
 
 <script src="{{ url_for('static', filename='bower_components/jquery/dist/jquery.min.js') }}"></script>
 <script src="{{ url_for('static', filename='bower_components/semantic-ui/dist/semantic.min.js') }}"></script>
-<!--
-<script src="{{ url_for('static', filename='bower_components/cryptojslib/components/core.js') }}"></script>
-<script src="{{ url_for('static', filename='bower_components/cryptojslib/components/cipher-core.js') }}"></script>
-<script src="{{ url_for('static', filename='bower_components/cryptojslib/components/aes.js') }}"></script>
--->
-
 <script src="{{ url_for('static', filename='bower_components/cryptojslib/rollups/aes.js') }}"></script>
-<script src="{{ url_for('static', filename='bower_components/cryptojslib/components/uint8.js') }}"></script>
-<!--
-<script src="{{ url_for('static', filename='bower_components/cryptojslib/components/enc-base64-min.js') }}"></script>
-<script src="{{ url_for('static', filename='bower_components/cryptojslib/components/enc-utf16-min.js') }}"></script>
--->
-<script src="{{ url_for('static', filename='main.js') }}"></script>
+<script src="{{ url_for('static', filename='utils/u8array.js') }}"></script>
 
 <div class="page">
   <div class="ui grid">
@@ -64,3 +53,5 @@
     </div>
   </div>
 </div>
+
+<script src="{{ url_for('static', filename='main.js') }}"></script>
