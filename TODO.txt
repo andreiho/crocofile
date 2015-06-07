@@ -6,14 +6,11 @@ _______________________________________________________________________
 [x] create directory per file
 [x] use filename as directory name
 [x] generate passphrase
-[ ] hash file (directory) name
 [x] encrypt chunks
 [ ] optional filename encryption
 [ ] create download url
-[ ] decrypt file
 [ ] add file description
-[ ] make sure filenames are unique
-[ ] save iv and download link to db
+[x] save iv and download link to db
 [ ] implement encryption web workers (for upload and encryption) 
 	(see: https://github.com/STRML/securesha.re-client/blob/master/jquery-spaghetti/app/uploader.js#L139 
 	or hushfile)
@@ -23,6 +20,7 @@ DECRYPTION / DOWNLOAD
 _______________________________________________________________________
 
 [ ] download link
+[ ] decrypt file
 
 
 MESSAGING
