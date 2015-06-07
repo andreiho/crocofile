@@ -40,7 +40,7 @@ _______________________________________________________________________
 
 [ ] csrf token
 [x] make it work with nginx
-[ ] tls
+[x] tls
 [ ] system and server config
 
 
