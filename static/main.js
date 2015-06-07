@@ -32,8 +32,8 @@ function encryptFile(slices, passphrase, iv) {
 
 	var encryptedSlices = [];
 	var aesEncryptor = CryptoJS.algo.AES.createEncryptor(passphrase, { iv: iv });
-
-	for (var i = 0; i < slices.length; i++) {
+	
+  for (var i = 0; i < slices.length; i++) {
 		var reader = new FileReader(); // Initialize the file reader.
 
 		reader.onload = function(e) {
@@ -52,7 +52,7 @@ function encryptFile(slices, passphrase, iv) {
 			if (i == slices.length) {
 
 				encryptedSlices.push(aesEncryptor.finalize());
-
+  
 				$.each(encryptedSlices, function(index, value) {
 
 					$.ajax({
@@ -74,7 +74,8 @@ function encryptFile(slices, passphrase, iv) {
 						headers: {
 							'X-File-Content-Type': "application/octet-stream",
 							'X-File-Name': filename,
-							'X-Chunk-Number': index
+							'X-Chunk-Number': index,
+              'X-IV' : iv
 						},
 						data: value, // binary chunk
 						processData: false,
@@ -119,7 +120,7 @@ function uploadFile(){
 }
 
 function successHandler(response) {
-	console.log(response);
+  console.log(response);
 }
 
 function errorHandler() {
