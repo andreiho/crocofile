@@ -90,12 +90,28 @@ def upload():
 
         if binary_file:
 
+            chunknumber = secure_filename(request.headers['X-Chunk-Number'])
+            upload_token = request.headers['X-Upload-Token']
+            
+            if upload_token not in session:
+                return "failed"
+
+            filename = session[upload_token]
+
+            if not os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], filename)):
+                os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            with open(os.path.join(app.config['UPLOAD_FOLDER'], filename, chunknumber), 'wb') as f:
+                f.write(binary_file)
+
+            return upload_token
+    #        return redirect(url_for('vault', filename=filename))
+        else:
+
+            filename = secure_filename(request.headers['X-File-Name'])
+            filename = str(int(time.time())) + "_" + filename
             ipaddress = request.remote_addr
             iv = request.headers['X-IV']
-            chunknumber = secure_filename(request.headers['X-Chunk-Number'])
-            filename = secure_filename(request.headers['X-File-Name'])
-            filename = str(int(time.time())) + "_" + filename 
-
+            upload_token = request.headers['X-Upload-Token']
 
             cursor.execute('INSERT INTO files (ipaddress, iv, fileaddress) VALUES (%s, %s, %s) RETURNING id', (ipaddress, iv, filename))
             file_id = cursor.fetchone()
@@ -103,13 +119,7 @@ def upload():
             conn.commit()
             filename = str(file_id) + "_" + filename
 
-            if not os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], filename)):
-                os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            with open(os.path.join(app.config['UPLOAD_FOLDER'], filename, chunknumber), 'wb') as f:
-                f.write(binary_file)
-
-            return "success"
-    #        return redirect(url_for('vault', filename=filename))
+            session[upload_token] = filename
 
     return "failed"
 

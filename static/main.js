@@ -5,6 +5,8 @@
 // Global variable declarations.
 var alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+@!€§|~[]";
 var filename;
+var uploadToken;
+var iv;
 
 // Bindings.
 $('#passphrase').val(generatePass()); // Generate random passphrase on page load.
@@ -28,11 +30,11 @@ setTimeout(function () {
 ** ==========================================================================*/
 
 // Encrypt slices of a file.
-function encryptFile(slices, passphrase, iv) {
+function encryptFile(slices, passphrase) {
 
 	var encryptedSlices = [];
 	var aesEncryptor = CryptoJS.algo.AES.createEncryptor(passphrase, { iv: iv });
-	
+  
   for (var i = 0; i < slices.length; i++) {
 		var reader = new FileReader(); // Initialize the file reader.
 
@@ -54,8 +56,9 @@ function encryptFile(slices, passphrase, iv) {
 				encryptedSlices.push(aesEncryptor.finalize());
   
 				$.each(encryptedSlices, function(index, value) {
-
+          console.log("Ajax call with filename: " + filename);
 					$.ajax({
+
 						url: '/upload',
 						type: 'POST',
 						xhr: function() { // custom xhr
@@ -72,10 +75,9 @@ function encryptFile(slices, passphrase, iv) {
 						error: errorHandler,
 						// Form data
 						headers: {
-							'X-File-Content-Type': "application/octet-stream",
-							'X-File-Name': filename,
-							'X-Chunk-Number': index,
-              'X-IV' : iv
+							'X-File-Content-Type' : "application/octet-stream",
+							'X-Chunk-Number' : index,
+              'X-Upload-Token' : uploadToken
 						},
 						data: value, // binary chunk
 						processData: false,
@@ -106,23 +108,75 @@ function uploadFile(){
 		return window.alert("Please choose a file.");
 	}
 
-	// Slice the chosen file.
-	var slices = sliceFile(file);
+  // set upload token
+  uploadToken = uploadToken();
 
-	// Get the passphrase chosen by the user.
-	var passphrase = $('#passphrase').val();
+  // Create the initialization vector.
+  iv = createIV();
 
-	// Create the initialization vector.
-	var iv = createIV();
+  // establish upload session
+  $.ajax({
 
-	// Finally encrypt the slices using the passphrase and the iv.
-	encryptFile(slices, passphrase, iv);
+    url: '/upload',
+    type: 'POST',
+    xhr: function() { // custom xhr
+      var myXhr = $.ajaxSettings.xhr();
+      if(myXhr.upload) { // check if upload property exists
+        myXhr.upload.addEventListener('progress', progressHandler, false); // for handling the progress of the upload
+      }
+      return myXhr;
+    },
+    contentType: 'text/plain',
+    //Ajax events
+    //beforeSend: beforeSendHandler,
+    success: tokenSuccessHandler,
+    error: errorHandler,
+    // Form data
+    headers: {
+      'X-File-Content-Type' : "application/octet-stream",
+      'X-File-Name' : filename,
+      'X-Upload-Token' : uploadToken,
+      'X-IV' : iv
+    },
+    processData: false,
+    cache: false
+  });
+
 }
+function doUpload() {
+  // Get the chosen file.
+  var file =  $("#file-input")[0].files[0];
 
+  // Get the name of the file given by the user...
+  filename = $('#filename').val();
+
+  // ...or just take the existing name.
+  if (filename.length < 1){
+    filename = file.name;
+  }
+
+  if(!file) {
+    return window.alert("Please choose a file.");
+  }
+
+  // Slice the chosen file.
+  var slices = sliceFile(file);
+
+  // Get the passphrase chosen by the user.
+  var passphrase = $('#passphrase').val();
+
+  // Finally encrypt the slices using the passphrase and the iv.
+  encryptFile(slices, passphrase);
+}
 function successHandler(response) {
   console.log(response);
+  if (response != "failed") {
+    filename = response;
+  }
 }
-
+function tokenSuccessHandler(response) {
+  doUpload();
+}
 function errorHandler() {
 	console.log("error");
 }
@@ -185,6 +239,16 @@ function randomString(length, chars) {
 	return result;
 }
 
+// unique token for upload
+function uploadToken() {
+  function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
+  }
+  return s4() + s4() + s4() + s4() +
+    s4() + s4() + new Date().getTime();
+}
 // Convert uint8array to binary string.
 function convertUint8ArrayToBinaryString(u8Array) {
 	var i, len = u8Array.length, b_str = "";
