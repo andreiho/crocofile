@@ -26,6 +26,12 @@ psql crocofile
 CREATE TABLE users (id SERIAL PRIMARY KEY, username varchar(30) UNIQUE not null, password varchar(600) not null, timestamp date not null default CURRENT_DATE);
 ```
 
+**Create the files table:**
+
+```
+CREATE TABLE files (id SERIAL PRIMARY KEY, ipaddress inet not null, iv varchar(32) not null, fileaddress varchar(90));
+```
+
 **Add these lines to your environment:**
 
 ```
