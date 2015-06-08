@@ -86,7 +86,7 @@ def csrf_protect():
         if 'X-Csrf-Token' in request.headers:
             print(request.headers['X-Csrf-Token'])
             print(token)
-            if 'X-Last-Request' in request.headers:
+            if request.headers['X-Last-Request'] == "true":
                 token = session.pop('_csrf_token', None)
             if not token or token != request.headers['X-Csrf-Token']:
                 abort(403)    

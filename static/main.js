@@ -10,6 +10,7 @@ var iv;
 var downloadChunks;
 var downloadedChunks = [];
 var csrfToken;
+var lastRequest;
 
 // Bindings.
 $('#passphrase').val(generatePass()); // Generate random passphrase on page load.
@@ -29,6 +30,7 @@ setTimeout(function () {
 
 // ajax call on /download load
 $(document).ready(function() {
+  lastRequest = "false";
   csrfToken = document.getElementsByName("_csrf_token")[0].value;
   var href = window.location.href;
   href = href.substr(href.lastIndexOf('/') + 1);
@@ -56,6 +58,7 @@ $(document).ready(function() {
       // Form data
       headers: {
         'X-File-Content-Type' : "application/octet-stream",
+        'X-Last-Request' : lastRequest,
         'X-Csrf-Token' : csrfToken,
         'X-File-Request' : "true",
         'X-File-Name' : getParameterByName("file")
@@ -101,7 +104,9 @@ function encryptFile(slices, passphrase) {
 
 				encryptedSlices.push(aesEncryptor.finalize().toString(CryptoJS.enc.Base64));
 				$.each(encryptedSlices, function(index, value) {
-
+          if (index == encryptedSlices.length -1) {
+            lastRequest = "true";
+          }
 					$.ajax({
 
 						url: '/upload',
@@ -122,6 +127,7 @@ function encryptFile(slices, passphrase) {
 						headers: {
 							'X-File-Content-Type' : "application/octet-stream",
               'X-Csrf-Token' : csrfToken,
+              'X-Last-Request' : lastRequest,
 							'X-Chunk-Number' : index,
               'X-Upload-Token' : uploadToken,
               'X-Total-Chunks' : encryptedSlices.length
@@ -179,6 +185,7 @@ function uploadFile(){
     // data
     headers: {
       'X-File-Content-Type' : "application/octet-stream",
+      'X-Last-Request' : lastRequest,
       'X-Csrf-Token' : csrfToken,
       'X-File-Name' : filename,
       'X-Upload-Token' : uploadToken,
@@ -232,6 +239,7 @@ function doDownload() {
       // Form data
       headers: {
         'X-File-Content-Type' : "application/octet-stream",
+        'X-Last-Request' : lastRequest,
         'X-Csrf-Token' : csrfToken,
         'X-File-Request' : "false",
         'X-Requested-Chunk' : i.toString(),
