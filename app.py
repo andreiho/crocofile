@@ -1,4 +1,4 @@
-import os, psycopg2, time, sys, scrypt, random, binascii
+import os, psycopg2, time, sys, scrypt, random, binascii, base64
 from flask import Flask, request, session, redirect, url_for, render_template, flash
 from flask.ext.bower import Bower
 from werkzeug import secure_filename
@@ -87,12 +87,13 @@ def upload():
     if request.method == 'POST':
         
         binary_file = request.data
-
+        
         if binary_file:
 
             chunknumber = secure_filename(request.headers['X-Chunk-Number'])
+            total_chunks = request.headers['X-Total-Chunks']
             upload_token = request.headers['X-Upload-Token']
-            
+
             if upload_token not in session:
                 return "failed"
 
@@ -103,8 +104,11 @@ def upload():
             with open(os.path.join(app.config['UPLOAD_FOLDER'], filename, chunknumber), 'wb') as f:
                 f.write(binary_file)
 
+            if int(chunknumber) == int(total_chunks) - 1:
+                session.pop(upload_token, None)
+            
             return upload_token
-    #        return redirect(url_for('vault', filename=filename))
+
         else:
 
             filename = secure_filename(request.headers['X-File-Name'])
@@ -120,6 +124,35 @@ def upload():
             filename = str(file_id) + "_" + filename
 
             session[upload_token] = filename
+
+            return "start upload"
+
+    return "failed"
+
+@app.route('/download', methods=['GET', 'POST'])
+def download():
+    return render_template("download.html")
+
+@app.route('/downloadHandler', methods=['GET', 'POST'])
+def downloadHandler():
+    
+    if request.method == 'POST':
+
+        if  request.headers['X-File-Request'] == "true":
+            filename = request.headers['X-File-Name']
+            chunks = os.listdir(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            print(chunks)
+            return str(len(chunks))
+
+        else:
+            chunknumber = int(request.headers['X-Requested-Chunk'])
+            print(chunknumber)
+            filename = request.headers['X-File-Name']
+            chunks = os.listdir(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            print(chunks)
+            with open(os.path.join(app.config['UPLOAD_FOLDER'], filename, chunks[chunknumber])) as f:
+                return f.read()
+
 
     return "failed"
 
@@ -222,6 +255,7 @@ def vault():
 @app.route('/test')
 def test():
     return render_template("test.html")
+
 # ROUTES END
 
 def add_to_wrong_username(ip):
