@@ -76,6 +76,24 @@ class UserContext():
 
         return result
 
+# CSRF safeguard
+
+@app.before_request
+def csrf_protect():
+    if request.method == "POST":
+        token = session.pop('_csrf_token', None)
+        if not token or token != request.form.get('_csrf_token'):
+            return render_template('login.html', error="Catastrophic CSRF failure.")
+
+def generate_csrf_token():
+    if '_csrf_token' not in session:
+        token = scrypt.hash(str(int(time.time())), 'change me; im salty')
+        session['_csrf_token'] = binascii.hexlify(token).decode('utf-8')
+    return session['_csrf_token']
+
+# Register a global function in the Jinja environment of csrf_token() for use in forms
+app.jinja_env.globals['csrf_token'] = generate_csrf_token
+
 # ROUTES
 
 @app.route('/', methods=['GET', 'POST'])
