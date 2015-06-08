@@ -31,7 +31,10 @@ FRONTEND
 _______________________________________________________________________
 
 [ ] progress bar for encryption and upload
-
+[ ] display files in vault
+[ ] show download link after upload
+[ ] link to file in /vault (?)
+[ ] cms inteface 
 
 BACKEND GENERAL
 _______________________________________________________________________
@@ -40,7 +43,7 @@ _______________________________________________________________________
 [x] make it work with nginx
 [x] tls
 [ ] system and server config
-
+[ ] cms / admin user
 
 ATTACK
 _______________________________________________________________________
