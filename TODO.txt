@@ -39,7 +39,7 @@ _______________________________________________________________________
 BACKEND GENERAL
 _______________________________________________________________________
 
-[ ] csrf token
+[x] csrf token
 [x] make it work with nginx
 [x] tls
 [ ] system and server config
