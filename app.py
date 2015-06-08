@@ -1,5 +1,5 @@
 import os, psycopg2, time, sys, scrypt, random, binascii, base64
-from flask import Flask, request, session, redirect, url_for, render_template, flash
+from flask import Flask, request, session, redirect, url_for, render_template, flash, abort
 from flask.ext.bower import Bower
 from werkzeug import secure_filename
 
@@ -81,9 +81,19 @@ class UserContext():
 @app.before_request
 def csrf_protect():
     if request.method == "POST":
-        token = session.pop('_csrf_token', None)
-        if not token or token != request.form.get('_csrf_token'):
-            return render_template('login.html', error="Catastrophic CSRF failure.")
+        token = session['_csrf_token']
+
+        if 'X-Csrf-Token' in request.headers:
+            print(request.headers['X-Csrf-Token'])
+            print(token)
+            if 'X-Last-Request' in request.headers:
+                token = session.pop('_csrf_token', None)
+            if not token or token != request.headers['X-Csrf-Token']:
+                abort(403)    
+        else:
+            token = session.pop('_csrf_token', None)
+            if not token or token != request.form.get('_csrf_token'):
+                abort(403)
 
 def generate_csrf_token():
     if '_csrf_token' not in session:

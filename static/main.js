@@ -9,6 +9,7 @@ var uploadToken;
 var iv;
 var downloadChunks;
 var downloadedChunks = [];
+var csrfToken;
 
 // Bindings.
 $('#passphrase').val(generatePass()); // Generate random passphrase on page load.
@@ -28,7 +29,7 @@ setTimeout(function () {
 
 // ajax call on /download load
 $(document).ready(function() {
-
+  csrfToken = document.getElementsByName("_csrf_token")[0].value;
   var href = window.location.href;
   href = href.substr(href.lastIndexOf('/') + 1);
 
@@ -55,6 +56,7 @@ $(document).ready(function() {
       // Form data
       headers: {
         'X-File-Content-Type' : "application/octet-stream",
+        'X-Csrf-Token' : csrfToken,
         'X-File-Request' : "true",
         'X-File-Name' : getParameterByName("file")
       },
@@ -119,6 +121,7 @@ function encryptFile(slices, passphrase) {
 						// Form data
 						headers: {
 							'X-File-Content-Type' : "application/octet-stream",
+              'X-Csrf-Token' : csrfToken,
 							'X-Chunk-Number' : index,
               'X-Upload-Token' : uploadToken,
               'X-Total-Chunks' : encryptedSlices.length
@@ -176,6 +179,7 @@ function uploadFile(){
     // data
     headers: {
       'X-File-Content-Type' : "application/octet-stream",
+      'X-Csrf-Token' : csrfToken,
       'X-File-Name' : filename,
       'X-Upload-Token' : uploadToken,
       'X-IV' : iv
@@ -228,6 +232,7 @@ function doDownload() {
       // Form data
       headers: {
         'X-File-Content-Type' : "application/octet-stream",
+        'X-Csrf-Token' : csrfToken,
         'X-File-Request' : "false",
         'X-Requested-Chunk' : i.toString(),
         'X-File-Name' : filename
