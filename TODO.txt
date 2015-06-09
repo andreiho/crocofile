@@ -8,7 +8,7 @@ _______________________________________________________________________
 [x] generate passphrase
 [x] encrypt chunks
 [ ] optional filename encryption
-[ ] create download url
+[x] create download url
 [ ] add file description
 [x] save iv and download link to db
 [ ] implement encryption web workers (for upload and encryption) 
@@ -19,8 +19,8 @@ _______________________________________________________________________
 DECRYPTION / DOWNLOAD
 _______________________________________________________________________
 
-[ ] download link
-[ ] decrypt file
+[x] download link
+[x] decrypt file
 
 
 MESSAGING
