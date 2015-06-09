@@ -1,4 +1,4 @@
-import os, psycopg2, time, sys, scrypt, random, binascii, base64
+import os, psycopg2, time, sys, scrypt, random, binascii, base64, json
 from flask import Flask, request, session, redirect, url_for, render_template, flash, abort
 from flask.ext.bower import Bower
 from werkzeug import secure_filename
@@ -167,17 +167,26 @@ def downloadHandler():
     if request.method == 'POST':
 
         if  request.headers['X-File-Request'] == "true":
-            filename = request.headers['X-File-Name']
+            iv = None
+            filename = None
+            fileid = request.headers['X-File-Name']
+            
+            cursor.execute('SELECT * FROM files WHERE id = (%s);', (fileid,))
+            result = cursor.fetchone()
+            
+            iv = result[2]
+            print(result[3])
+            filename = fileid + "_" + result[3]
             chunks = os.listdir(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            print(chunks)
-            return str(len(chunks))
+    
+            return json.dumps({'chunks': str(len(chunks)), 'iv' : iv, 'filename' : filename})
 
         else:
             chunknumber = int(request.headers['X-Requested-Chunk'])
             print(chunknumber)
             filename = request.headers['X-File-Name']
             chunks = os.listdir(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            print(chunks)
+            
             with open(os.path.join(app.config['UPLOAD_FOLDER'], filename, chunks[chunknumber])) as f:
                 return f.read()
 

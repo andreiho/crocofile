@@ -27,7 +27,7 @@ MESSAGING
 _______________________________________________________________________
 
 
-FRONTEND
+UX
 _______________________________________________________________________
 
 [ ] progress bar for encryption and upload
@@ -35,6 +35,8 @@ _______________________________________________________________________
 [ ] show download link after upload
 [ ] link to file in /vault (?)
 [ ] cms inteface 
+[ ] upload and download UX stuff progress, redirect...
+[ ] give user download link and passphrase after upload (then redirect? Like a "got it" button?)
 
 BACKEND GENERAL
 _______________________________________________________________________
