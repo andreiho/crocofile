@@ -76,21 +76,22 @@ pip freeze > requirements.txt
 python app.py
 ```
 
-**Run the app in production:**
+Running in production
+------------------------
 
-First, ensure that nginx is running.
+**First, ensure that nginx is running.**
 
 ```
 sudo service nginx status
 ```
 
-Activate the virtual environment:
+**Activate the virtual environment:**
 
 ```
 source /var/www/crocofile/crocoenv/bin/activate
 ```
 
-Add these lines to your environment:
+**Add these lines to the environment:**
 
 ```
 export APP_SETTINGS="config.ProductionConfig"
@@ -100,7 +101,7 @@ export APP_SETTINGS="config.ProductionConfig"
 export CONN_STRING="host='localhost' dbname='crocofile' user='crocofile' password='putpasswordhere'"
 ```
 
-Run the app:
+**Run the app:**
 
 ```
 uwsgi --ini /var/www/crocofile/crocofile/crocofile_uwsgi.ini
