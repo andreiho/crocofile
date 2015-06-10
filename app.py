@@ -110,91 +110,6 @@ app.jinja_env.globals['csrf_token'] = generate_csrf_token
 def index():    
     return render_template("index.html")
 
-@app.route('/upload', methods=['GET', 'POST'])
-def upload():
-    if request.method == 'POST':
-        
-        binary_file = request.data
-        
-        if binary_file:
-
-            chunknumber = secure_filename(request.headers['X-Chunk-Number'])
-            total_chunks = request.headers['X-Total-Chunks']
-            upload_token = request.headers['X-Upload-Token']
-
-            if upload_token not in session:
-                return "failed"
-
-            filename = session[upload_token]
-
-            if not os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], filename)):
-                os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            with open(os.path.join(app.config['UPLOAD_FOLDER'], filename, chunknumber), 'wb') as f:
-                f.write(binary_file)
-
-            if int(chunknumber) == int(total_chunks) - 1:
-                session.pop(upload_token, None)
-            
-            return upload_token
-
-        else:
-
-            filename = secure_filename(request.headers['X-File-Name'])
-            filename = str(int(time.time())) + "_" + filename
-            ipaddress = request.remote_addr
-            iv = request.headers['X-IV']
-            upload_token = request.headers['X-Upload-Token']
-
-            cursor.execute('INSERT INTO files (ipaddress, iv, fileaddress) VALUES (%s, %s, %s) RETURNING id', (ipaddress, iv, filename))
-            file_id = cursor.fetchone()
-            file_id = file_id[0]
-            conn.commit()
-            filename = str(file_id) + "_" + filename
-
-            session[upload_token] = filename
-
-            return "start upload"
-
-    return "failed"
-
-@app.route('/download', methods=['GET', 'POST'])
-def download():
-    return render_template("download.html")
-
-@app.route('/downloadHandler', methods=['GET', 'POST'])
-def downloadHandler():
-    
-    if request.method == 'POST':
-
-        if  request.headers['X-File-Request'] == "true":
-            iv = None
-            filename = None
-            fileid = request.headers['X-File-Name']
-            
-            cursor.execute('SELECT * FROM files WHERE id = (%s);', (fileid,))
-            result = cursor.fetchone()
-            
-            iv = result[2]
-            print(result[3])
-            filename = fileid + "_" + result[3]
-            chunks = os.listdir(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-    
-            return json.dumps({'chunks': str(len(chunks)), 'iv' : iv, 'filename' : filename})
-
-        else:
-            chunknumber = int(request.headers['X-Requested-Chunk'])
-            print(chunknumber)
-            filename = request.headers['X-File-Name']
-            chunks = os.listdir(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            
-            with open(os.path.join(app.config['UPLOAD_FOLDER'], filename, chunks[chunknumber])) as f:
-                return f.read()
-
-
-    return "failed"
-
-@app.route('/logout')
-def logout():
     session.pop('logged_in', None)
     flash('You were logged out.')
     return redirect('/')
@@ -288,10 +203,6 @@ def registration():
 @app.route('/vault')
 def vault():
     return render_template("vault.html")
-
-@app.route('/test')
-def test():
-    return render_template("test.html")
 
 # ROUTES END
 
