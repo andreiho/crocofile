@@ -2,8 +2,10 @@ import os, psycopg2, time, sys, scrypt, random, binascii, base64, json
 from flask import Flask, request, session, redirect, url_for, render_template, flash, abort
 from flask.ext.bower import Bower
 from werkzeug import secure_filename
+from flask_sslify import SSLify
 
 app = Flask(__name__)
+sslify = SSLify(app)
 
 # load config
 app.config.from_object(os.environ['APP_SETTINGS'])
