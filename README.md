@@ -76,19 +76,32 @@ pip freeze > requirements.txt
 python app.py
 ```
 
-**Run the app in production**
+**Run the app in production:**
 
-Ensure that Nginx is running, listening on port 80 and configured with the following in the `http` section of nginx.conf:
-
-```
-location / {
-  include uwsgi_params;
-  uwsgi_pass 127.0.0.1:3031;
-}
-```
-
-subsequently, run the Flask app by - when in the virtual environment:
+First, ensure that nginx is running.
 
 ```
-uwsgi app.ini
+sudo service nginx status
+```
+
+Activate the virtual environment:
+
+```
+source /var/www/crocofile/crocoenv/bin/activate
+```
+
+Add these lines to your environment:
+
+```
+export APP_SETTINGS="config.ProductionConfig"
+```
+
+```
+export CONN_STRING="host='localhost' dbname='crocofile' user='crocofile' password='putpasswordhere'"
+```
+
+Run the app:
+
+```
+uwsgi --ini /var/www/crocofile/crocofile/crocofile_uwsgi.ini
 ```
