@@ -9,13 +9,15 @@ var uploadToken;
 var iv;
 var downloadChunks;
 var downloadedChunks = [];
+var decryptedChunks = [];
 var csrfToken;
 var lastRequest;
 
 // Bindings.
 $('#passphrase').val(generatePass()); // Generate random passphrase on page load.
 $('#generate').on('click', newPass); // Generate random passphrase on user request.
-
+$('#dec-submit').on('click', decryptChunks); // Decrypt downloaded chunks
+$('#download-submit').on('click', downloadFile);
 $('#file-input').change(uploadFile); // Upload a file on change.
 
 // Close alert messages.
@@ -219,7 +221,6 @@ function doUpload() {
 }
 function doDownload() {
     // Get the name of the file given by the user...
-  filename = getParameterByName('file')
   for (var i = 0; i < downloadChunks; i++) {
     $.ajax({
       url: '/downloadHandler',
@@ -251,6 +252,32 @@ function doDownload() {
   }
 }
 
+function decryptChunks() {
+  var passphrase = $('#dec-passphrase').val();
+  iv = CryptoJS.enc.Hex.parse(iv);
+
+  var aesDecryptor = CryptoJS.algo.AES.createDecryptor(passphrase, { iv: iv });
+
+  for (var i = 0; i < downloadedChunks.length; i++) {
+    var cipherText = CryptoJS.enc.Base64.parse(downloadedChunks[i]);
+    decryptedChunks.push(aesDecryptor.process(cipherText));
+  }
+  decryptedChunks.push(aesDecryptor.finalize());
+  $('#download-submit').show();
+}
+
+function downloadFile() {
+  var fileToDownload = "";
+  var typedArray = []; 
+
+  for (var i = 0; i < decryptedChunks.length; i++) {
+    typedArray.push(convertWordArrayToUint8Array(decryptedChunks[i]));
+  }
+  var blob = new Blob(typedArray);
+  var downloadURL = window.URL.createObjectURL(blob);
+  
+  $("#download").append($("<a/>").attr({href: downloadURL, download: "filename.png"}).append("Download"));
+}
 /* ============================================================================
 ** XHR handlers
 ** ==========================================================================*/
@@ -262,8 +289,14 @@ function tokenSuccessHandler(response) {
   doUpload();
 }
 function downloadSuccessHandler(response) {
-  downloadChunks = parseInt(response);
+  var responseObject = JSON.parse(response);
+  
+  downloadChunks = responseObject.chunks;
+  filename = responseObject.filename;
+  iv = responseObject.iv;
+
   doDownload();
+  console.log("download: " + response);
 }
 function downloadChunkSuccessHandler(response) {
   downloadedChunks.push(response);
@@ -368,4 +401,19 @@ function convertBinaryStringToUint8Array(bStr) {
 	}
 
 	return u8_array;
+}
+
+function convertWordArrayToUint8Array(wordArray) {
+  var len = wordArray.words.length,
+    u8_array = new Uint8Array(len << 2),
+    offset = 0, word, i
+  ;
+  for (i=0; i<len; i++) {
+    word = wordArray.words[i];
+    u8_array[offset++] = word >> 24;
+    u8_array[offset++] = (word >> 16) & 0xff;
+    u8_array[offset++] = (word >> 8) & 0xff;
+    u8_array[offset++] = word & 0xff;
+  }
+  return u8_array;
 }

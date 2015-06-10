@@ -10,8 +10,9 @@ _______________________________________________________________________
 [ ] optional filename encryption
 [x] create download url
 [ ] add file description
+[ ] add username tag
 [x] save iv and download link to db
-[ ] implement encryption web workers (for upload and encryption) 
+[ ] implement web workers (for upload and encryption) 
 	(see: https://github.com/STRML/securesha.re-client/blob/master/jquery-spaghetti/app/uploader.js#L139 
 	or hushfile)
 
@@ -23,11 +24,19 @@ _______________________________________________________________________
 [x] decrypt file
 
 
+FILEVAULT
+_______________________________________________________________________
+
+[ ] display files in filevault
+[ ] make them download links
+[ ] display all usernames
+
+
 MESSAGING
 _______________________________________________________________________
 
 
-FRONTEND
+UX
 _______________________________________________________________________
 
 [ ] progress bar for encryption and upload
@@ -35,6 +44,9 @@ _______________________________________________________________________
 [ ] show download link after upload
 [ ] link to file in /vault (?)
 [ ] cms inteface 
+[ ] upload and download UX stuff progress, redirect...
+[ ] give user download link and passphrase after upload (then redirect? Like a "got it" button?)
+
 
 BACKEND GENERAL
 _______________________________________________________________________
@@ -44,6 +56,7 @@ _______________________________________________________________________
 [x] tls
 [ ] system and server config
 [ ] cms / admin user
+
 
 ATTACK
 _______________________________________________________________________
