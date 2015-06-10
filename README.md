@@ -88,7 +88,7 @@ sudo service nginx status
 **Activate the virtual environment:**
 
 ```
-source /var/www/crocofile/crocoenv/bin/activate
+source /var/www/crocofile/venv/bin/activate
 ```
 
 **Add these lines to the environment:**
@@ -98,11 +98,11 @@ export APP_SETTINGS="config.ProductionConfig"
 ```
 
 ```
-export CONN_STRING="host='localhost' dbname='crocofile' user='crocofile' password='putpasswordhere'"
+export CONN_STRING="host='localhost' dbname='crocofile' user='crocofile' password='password'"
 ```
 
 **Run the app:**
 
 ```
-uwsgi --ini /var/www/crocofile/crocofile/crocofile_uwsgi.ini
+uwsgi --ini /var/www/crocofile/crocofile.ini
 ```
