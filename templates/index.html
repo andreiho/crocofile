@@ -12,6 +12,7 @@
   <div class="ui two column centered grid">
     <div class="column">
       <form enctype="multipart/form-data" class="ui form" action="{{ url_for('index') }}" method="post">
+	<input name=_csrf_token type=hidden value="{{ csrf_token() }}">
         <div class="field">
           <div class="ui left icon action input">
             <i class="key icon"></i>

@@ -1,5 +1,5 @@
-import os, psycopg2, time, sys, scrypt, random, binascii
-from flask import Flask, request, session, redirect, url_for, render_template, flash
+import os, psycopg2, time, sys, scrypt, random, binascii, base64, json
+from flask import Flask, request, session, redirect, url_for, render_template, flash, abort
 from flask.ext.bower import Bower
 from werkzeug import secure_filename
 
@@ -76,6 +76,34 @@ class UserContext():
 
         return result
 
+# CSRF safeguard
+
+@app.before_request
+def csrf_protect():
+    if request.method == "POST":
+        token = session['_csrf_token']
+
+        if 'X-Csrf-Token' in request.headers:
+            print(request.headers['X-Csrf-Token'])
+            print(token)
+            if request.headers['X-Last-Request'] == "true":
+                token = session.pop('_csrf_token', None)
+            if not token or token != request.headers['X-Csrf-Token']:
+                abort(403)    
+        else:
+            token = session.pop('_csrf_token', None)
+            if not token or token != request.form.get('_csrf_token'):
+                abort(403)
+
+def generate_csrf_token():
+    if '_csrf_token' not in session:
+        token = scrypt.hash(str(int(time.time())), 'change me; im salty')
+        session['_csrf_token'] = binascii.hexlify(token).decode('utf-8')
+    return session['_csrf_token']
+
+# Register a global function in the Jinja environment of csrf_token() for use in forms
+app.jinja_env.globals['csrf_token'] = generate_csrf_token
+
 # ROUTES
 
 @app.route('/', methods=['GET', 'POST'])
@@ -85,18 +113,83 @@ def index():
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
     if request.method == 'POST':
-    
+        
         binary_file = request.data
         
         if binary_file:
+
             chunknumber = secure_filename(request.headers['X-Chunk-Number'])
-            filename = secure_filename(request.headers['X-File-Name'])
+            total_chunks = request.headers['X-Total-Chunks']
+            upload_token = request.headers['X-Upload-Token']
+
+            if upload_token not in session:
+                return "failed"
+
+            filename = session[upload_token]
+
             if not os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], filename)):
                 os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             with open(os.path.join(app.config['UPLOAD_FOLDER'], filename, chunknumber), 'wb') as f:
                 f.write(binary_file)
-            return "success"
-    #        return redirect(url_for('vault', filename=filename))
+
+            if int(chunknumber) == int(total_chunks) - 1:
+                session.pop(upload_token, None)
+            
+            return upload_token
+
+        else:
+
+            filename = secure_filename(request.headers['X-File-Name'])
+            filename = str(int(time.time())) + "_" + filename
+            ipaddress = request.remote_addr
+            iv = request.headers['X-IV']
+            upload_token = request.headers['X-Upload-Token']
+
+            cursor.execute('INSERT INTO files (ipaddress, iv, fileaddress) VALUES (%s, %s, %s) RETURNING id', (ipaddress, iv, filename))
+            file_id = cursor.fetchone()
+            file_id = file_id[0]
+            conn.commit()
+            filename = str(file_id) + "_" + filename
+
+            session[upload_token] = filename
+
+            return "start upload"
+
+    return "failed"
+
+@app.route('/download', methods=['GET', 'POST'])
+def download():
+    return render_template("download.html")
+
+@app.route('/downloadHandler', methods=['GET', 'POST'])
+def downloadHandler():
+    
+    if request.method == 'POST':
+
+        if  request.headers['X-File-Request'] == "true":
+            iv = None
+            filename = None
+            fileid = request.headers['X-File-Name']
+            
+            cursor.execute('SELECT * FROM files WHERE id = (%s);', (fileid,))
+            result = cursor.fetchone()
+            
+            iv = result[2]
+            print(result[3])
+            filename = fileid + "_" + result[3]
+            chunks = os.listdir(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    
+            return json.dumps({'chunks': str(len(chunks)), 'iv' : iv, 'filename' : filename})
+
+        else:
+            chunknumber = int(request.headers['X-Requested-Chunk'])
+            print(chunknumber)
+            filename = request.headers['X-File-Name']
+            chunks = os.listdir(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            
+            with open(os.path.join(app.config['UPLOAD_FOLDER'], filename, chunks[chunknumber])) as f:
+                return f.read()
+
 
     return "failed"
 
@@ -199,6 +292,7 @@ def vault():
 @app.route('/test')
 def test():
     return render_template("test.html")
+
 # ROUTES END
 
 def add_to_wrong_username(ip):
