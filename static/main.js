@@ -12,12 +12,14 @@ var downloadedChunks = [];
 var decryptedChunks = [];
 var csrfToken;
 var lastRequest;
+var fileId;
+var finalPassphrase;
 
 // Bindings.
 $('#passphrase').val(generatePass()); // Generate random passphrase on page load.
 $('#generate').on('click', newPass); // Generate random passphrase on user request.
-$('#dec-submit').on('click', decryptChunks); // Decrypt downloaded chunks
-$('#download-submit').on('click', downloadFile);
+$('#dec-submit').on('click', decryptChunks); // Decrypt downloaded chunks.
+$('#download-submit').on('click', downloadFile); // Download file.
 $('#file-input').change(uploadFile); // Upload a file on change.
 
 // Close alert messages.
@@ -30,10 +32,14 @@ setTimeout(function () {
 	$('.message').fadeOut();
 }, 5000);
 
-// ajax call on /download load
+/* ============================================================================
+** File download.
+** ==========================================================================*/
+
 $(document).ready(function() {
   lastRequest = "false";
   csrfToken = document.getElementsByName("_csrf_token")[0].value;
+
   var href = window.location.href;
   href = href.substr(href.lastIndexOf('/') + 1);
 
@@ -54,7 +60,6 @@ $(document).ready(function() {
       },
       contentType: 'text/plain',
       //Ajax events
-      //beforeSend: beforeSendHandler,
       success: downloadSuccessHandler,
       error: errorHandler,
       // Form data
@@ -83,14 +88,15 @@ function encryptFile(slices, passphrase) {
 	var aesEncryptor = CryptoJS.algo.AES.createEncryptor(passphrase, { iv: iv });
 
   var readerArray = [];
-  
+
   for (var j = 0; j < slices.length; j++) {
     readerArray.push(new FileReader()); // Initialize the file reader.
   }
-  $.each(readerArray, function(index, value) {  
-  
+
+  $.each(readerArray, function(index, value) {
+
     value.onload = function(e) {
-      
+
       var ui8a = new Uint8Array(value.result);
       var wordarray = CryptoJS.enc.u8array.parse(ui8a);
 
@@ -105,10 +111,13 @@ function encryptFile(slices, passphrase) {
 			if (encryptedSlices.length == slices.length) {
 
 				encryptedSlices.push(aesEncryptor.finalize().toString(CryptoJS.enc.Base64));
+
 				$.each(encryptedSlices, function(index, value) {
+
           if (index == encryptedSlices.length -1) {
             lastRequest = "true";
           }
+
 					$.ajax({
 
 						url: '/upload',
@@ -122,7 +131,6 @@ function encryptFile(slices, passphrase) {
 						},
 						contentType: 'text/plain',
 						//Ajax events
-						//beforeSend: beforeSendHandler,
 						success: successHandler,
 						error: errorHandler,
 						// Form data
@@ -138,14 +146,17 @@ function encryptFile(slices, passphrase) {
 						processData: false,
 						cache: false
 					});
+
 				});
 			}
 		}
 	});
 }
 
-// Upload slices of a file.
-function uploadFile(){
+/* ============================================================================
+** File upload.
+** ==========================================================================*/
+function uploadFile() {
   // Get the chosen file.
   var file =  $("#file-input")[0].files[0];
 
@@ -181,7 +192,7 @@ function uploadFile(){
     },
     contentType: 'text/plain',
     //Ajax events
-    //beforeSend: beforeSendHandler,
+		beforeSend: beforeSendHandler,
     success: tokenSuccessHandler, //start actual upload after token is set
     error: errorHandler,
     // data
@@ -198,6 +209,8 @@ function uploadFile(){
   });
 
 }
+
+// File upload handler.
 function doUpload() {
   // Get the chosen file.
   var file =  $("#file-input")[0].files[0];
@@ -219,6 +232,8 @@ function doUpload() {
   // Finally encrypt the slices using the passphrase and the iv.
   encryptFile(slices, passphrase);
 }
+
+// File download handler.
 function doDownload() {
     // Get the name of the file given by the user...
   for (var i = 0; i < downloadChunks; i++) {
@@ -252,6 +267,7 @@ function doDownload() {
   }
 }
 
+// Decrypt chunks of a file.
 function decryptChunks() {
   var passphrase = $('#dec-passphrase').val();
   iv = CryptoJS.enc.Hex.parse(iv);
@@ -266,31 +282,59 @@ function decryptChunks() {
   $('#download-submit').show();
 }
 
+// Download file after decryption.
 function downloadFile() {
   var fileToDownload = "";
-  var typedArray = []; 
+  var typedArray = [];
 
   for (var i = 0; i < decryptedChunks.length; i++) {
     typedArray.push(convertWordArrayToUint8Array(decryptedChunks[i]));
   }
+
   var blob = new Blob(typedArray);
   var downloadURL = window.URL.createObjectURL(blob);
-  
+
   $("#download").append($("<a/>").attr({href: downloadURL, download: "filename.png"}).append("Download"));
 }
+
 /* ============================================================================
 ** XHR handlers
 ** ==========================================================================*/
 
+function beforeSendHandler() {
+	$("#upload-form").addClass("loading");
+}
+
+function progressHandler(e) {
+	if(e.lengthComputable) {
+		console.log("progress");
+	}
+}
+
 function successHandler(response) {
   console.log(response);
+
+	if (response != uploadToken) {
+		fileId = response.match("^[^_]+(?=_)");
+
+		// Hide the loading state.
+		$("#upload-form").removeClass("loading");
+
+		$('.ui.modal').modal('show');
+	}
 }
+
+function errorHandler() {
+	console.log("error");
+}
+
 function tokenSuccessHandler(response) {
   doUpload();
 }
+
 function downloadSuccessHandler(response) {
   var responseObject = JSON.parse(response);
-  
+
   downloadChunks = responseObject.chunks;
   filename = responseObject.filename;
   iv = responseObject.iv;
@@ -298,23 +342,9 @@ function downloadSuccessHandler(response) {
   doDownload();
   console.log("download: " + response);
 }
+
 function downloadChunkSuccessHandler(response) {
   downloadedChunks.push(response);
-}
-function errorHandler() {
-	console.log("error");
-}
-
-function progressHandler(e) {
-	if(e.lengthComputable) {
-		console.log("progress");
-	}
-
-	if(e.loaded != e.total){
-    $(".itemStatus").html("Uploading: " + ((e.loaded / e.total) * 100).toFixed(0) + "% complete.");
-  } else {
-    $(".itemStatus").html("Upload complete. Generating URL...");
-  }
 }
 
 
@@ -322,12 +352,12 @@ function progressHandler(e) {
 ** Utilities.
 ** ==========================================================================*/
 
-// get query parameters
+// Get query parameters.
 function getParameterByName(name) {
-    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-        results = regex.exec(location.search);
-    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+  name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+      results = regex.exec(location.search);
+  return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
 // Slice a file into chunks.
@@ -371,7 +401,7 @@ function randomString(length, chars) {
 	return result;
 }
 
-// unique token for upload
+// Unique token for upload.
 function uploadToken() {
   function s4() {
     return Math.floor((1 + Math.random()) * 0x10000)
@@ -381,6 +411,7 @@ function uploadToken() {
   return s4() + s4() + s4() + s4() +
     s4() + s4() + new Date().getTime();
 }
+
 // Convert uint8array to binary string.
 function convertUint8ArrayToBinaryString(u8Array) {
 	var i, len = u8Array.length, b_str = "";
@@ -403,11 +434,13 @@ function convertBinaryStringToUint8Array(bStr) {
 	return u8_array;
 }
 
+// Convert word array to uint8 array.
 function convertWordArrayToUint8Array(wordArray) {
   var len = wordArray.words.length,
     u8_array = new Uint8Array(len << 2),
     offset = 0, word, i
   ;
+
   for (i=0; i<len; i++) {
     word = wordArray.words[i];
     u8_array[offset++] = word >> 24;
@@ -415,5 +448,6 @@ function convertWordArrayToUint8Array(wordArray) {
     u8_array[offset++] = (word >> 8) & 0xff;
     u8_array[offset++] = word & 0xff;
   }
+
   return u8_array;
 }
