@@ -13,7 +13,8 @@ var decryptedChunks = [];
 var csrfToken;
 var lastRequest;
 var fileId;
-var finalPassphrase;
+var passphrase;
+var downloadLink;
 
 // Bindings.
 $('#passphrase').val(generatePass()); // Generate random passphrase on page load.
@@ -226,7 +227,7 @@ function doUpload() {
   var slices = sliceFile(file);
 
   // Get the passphrase chosen by the user.
-  var passphrase = $('#passphrase').val();
+  passphrase = $('#passphrase').val();
   console.log("passphrase: " + passphrase);
 
   // Finally encrypt the slices using the passphrase and the iv.
@@ -270,16 +271,34 @@ function doDownload() {
 // Decrypt chunks of a file.
 function decryptChunks() {
   var passphrase = $('#dec-passphrase').val();
-  iv = CryptoJS.enc.Hex.parse(iv);
 
-  var aesDecryptor = CryptoJS.algo.AES.createDecryptor(passphrase, { iv: iv });
+	if (passphrase !== "") {
+		iv = CryptoJS.enc.Hex.parse(iv);
 
-  for (var i = 0; i < downloadedChunks.length; i++) {
-    var cipherText = CryptoJS.enc.Base64.parse(downloadedChunks[i]);
-    decryptedChunks.push(aesDecryptor.process(cipherText));
-  }
-  decryptedChunks.push(aesDecryptor.finalize());
-  $('#download-submit').show();
+		var aesDecryptor = CryptoJS.algo.AES.createDecryptor(passphrase, { iv: iv });
+
+	  for (var i = 0; i < downloadedChunks.length; i++) {
+	    var cipherText = CryptoJS.enc.Base64.parse(downloadedChunks[i]);
+	    decryptedChunks.push(aesDecryptor.process(cipherText));
+	  }
+
+	  decryptedChunks.push(aesDecryptor.finalize());
+
+		// Disable previous inputs
+		$("#dec-passphrase, #dec-submit").prop("disabled", true);
+
+		// Show the download controls.
+	  $('#download-container').show();
+
+		// Get the filename.
+		var index = filename.lastIndexOf("_");
+		filename = filename.substr(index+1);
+
+		$("#download-filename").focus().val(filename);
+
+	} else {
+		alert("You have to enter the passphrase to decrypt the file.");
+	}
 }
 
 // Download file after decryption.
@@ -294,7 +313,10 @@ function downloadFile() {
   var blob = new Blob(typedArray);
   var downloadURL = window.URL.createObjectURL(blob);
 
-  $("#download").append($("<a/>").attr({href: downloadURL, download: "filename.png"}).append("Download"));
+	filename = $("#download-filename").val();
+	$('#download-modal').modal('show');
+
+  $("#download").attr( { href: downloadURL, download: filename } );
 }
 
 /* ============================================================================
@@ -320,7 +342,15 @@ function successHandler(response) {
 		// Hide the loading state.
 		$("#upload-form").removeClass("loading");
 
-		$('.ui.modal').modal('show');
+		// Output the passphrase.
+		$("#file-passphrase").val(passphrase);
+
+		// Build the download link.
+		downloadLink = window.location.host + "/download?file=" + fileId;
+		$("#file-link").val(downloadLink).select();
+		$("#file-download").attr("href", downloadLink);
+
+		$('#upload-modal').modal('show');
 	}
 }
 
