@@ -4,15 +4,15 @@
 
 <div class="ui center aligned relaxed segment">
   <h4 class="ui disabled header">
-  Choose a strong passphrase or use the recommended generated one.
+    Choose a strong passphrase or use the recommended generated one.
   </h4>
 
   <div class="ui hidden divider"></div>
 
   <div class="ui two column centered grid">
     <div class="column">
-      <form enctype="multipart/form-data" class="ui form" action="{{ url_for('index') }}" method="post">
-	<input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+      <form enctype="multipart/form-data" id="upload-form" class="ui form" action="{{ url_for('index') }}" method="post">
+        <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
         <div class="field">
           <div class="ui left icon action input">
             <i class="key icon"></i>
@@ -41,14 +41,22 @@
         </div>
       </form>
 
-      <div class="ui hidden divider"></div>
-
-      <!-- <div class="ui small pink progress" id="upload-progress">
-        <div class="bar">
-          <div class="progress"></div>
+      <div class="ui small modal">
+        <i class="close icon"></i>
+        <div class="content">
+          <h2 class="ui medium header">
+            <i class="check icon"></i>
+            <div class="content">
+              Your file is ready.
+            </div>
+          </h2>
+          <div class="ui tiny header">Share this link with a friend to give them access to your file:</div>
+          <div class="ui fluid input">
+            <input type="text" placeholder="Search...">
+          </div>
         </div>
-        <div class="label">Progress bar for the upload. Not working yet.</div>
-      </div> -->
+      </div>
+
     </div>
   </div>
 

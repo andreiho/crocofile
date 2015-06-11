@@ -92,7 +92,7 @@ def csrf_protect():
             if request.headers['X-Last-Request'] == "true":
                 token = session.pop('_csrf_token', None)
             if not token or token != request.headers['X-Csrf-Token']:
-                abort(403)    
+                abort(403)
         else:
             token = session.pop('_csrf_token', None)
             if not token or token != request.form.get('_csrf_token'):
@@ -110,15 +110,15 @@ app.jinja_env.globals['csrf_token'] = generate_csrf_token
 # ROUTES
 
 @app.route('/', methods=['GET', 'POST'])
-def index():    
+def index():
     return render_template("index.html")
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
     if request.method == 'POST':
-        
+
         binary_file = request.data
-        
+
         if binary_file:
 
             chunknumber = secure_filename(request.headers['X-Chunk-Number'])
@@ -137,7 +137,8 @@ def upload():
 
             if int(chunknumber) == int(total_chunks) - 1:
                 session.pop(upload_token, None)
-            
+                return filename
+
             return upload_token
 
         else:
@@ -166,22 +167,22 @@ def download():
 
 @app.route('/downloadHandler', methods=['GET', 'POST'])
 def downloadHandler():
-    
+
     if request.method == 'POST':
 
         if  request.headers['X-File-Request'] == "true":
             iv = None
             filename = None
             fileid = request.headers['X-File-Name']
-            
+
             cursor.execute('SELECT * FROM files WHERE id = (%s);', (fileid,))
             result = cursor.fetchone()
-            
+
             iv = result[2]
             print(result[3])
             filename = fileid + "_" + result[3]
             chunks = os.listdir(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-    
+
             return json.dumps({'chunks': str(len(chunks)), 'iv' : iv, 'filename' : filename})
 
         else:
@@ -189,7 +190,7 @@ def downloadHandler():
             print(chunknumber)
             filename = request.headers['X-File-Name']
             chunks = os.listdir(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            
+
             with open(os.path.join(app.config['UPLOAD_FOLDER'], filename, chunks[chunknumber])) as f:
                 return f.read()
 
@@ -282,7 +283,7 @@ def registration():
         password = binascii.hexlify(hash_password(password)).decode('utf-8')
         cursor.execute('INSERT INTO users (username, password) VALUES (%s, %s)', (username, password))
         conn.commit()
-        load_all_users()    
+        load_all_users()
         flash('You have been registered.')
         return redirect(url_for('login'))
 
