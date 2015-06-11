@@ -21,8 +21,11 @@ conn = psycopg2.connect(conn_string)
 cursor = conn.cursor()
 print ("Connected!\n")
 
-# users get loaded before the app gets started (not implemented: on user table changes)
+# users get loaded before the app gets started (on user table changes)
 users_dict = {}
+# files get loaded before the app gets started (on file table changes)
+files_dict = {}
+
 # mapping an IP (string) -> username attempts (integer)
 wrong_username_dict = {}
 # mapping an IP (string) -> timestamp of timeout over
@@ -153,7 +156,7 @@ def upload():
 
             session[upload_token] = filename
 
-            return "start upload"
+            return upload_token
 
     return "failed"
 
@@ -287,6 +290,8 @@ def registration():
 
 @app.route('/vault')
 def vault():
+
+
     return render_template("vault.html")
 
 @app.route('/test')
@@ -342,13 +347,22 @@ def verify_password(hashed_password, guessed_password, maxtime=0.5):
 
 def load_all_users():
     global users_dict
-    cursor.execute('select id, username, password from users')
+    cursor.execute('SELECT id, username, password FROM users')
 
     for row in cursor.fetchall():
         users_dict[row[1]] = UserContext(row[0], row[1], row[2])
 
+
+def load_all_files():
+    global files_dict
+    cursor.execute('SELECT id, fileaddress FROM files')
+
+    for row in cursor.fetchall():
+        files_dict = dict(id=row[0], fileaddress=row[1])
+
 if __name__ == '__main__':
     with app.app_context():
+        load_all_files()
         load_all_users()
     app.run()
 
