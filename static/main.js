@@ -33,6 +33,11 @@ setTimeout(function () {
 	$('.message').fadeOut();
 }, 5000);
 
+// Select input value.
+$("input[type='text'].select").click(function() {
+   $(this).select();
+});
+
 /* ============================================================================
 ** File download.
 ** ==========================================================================*/
@@ -290,11 +295,11 @@ function decryptChunks() {
 		// Show the download controls.
 	  $('#download-container').show();
 
-		// Get the filename.
+		// Get the full file name.
 		var index = filename.lastIndexOf("_");
 		filename = filename.substr(index+1);
 
-		$("#download-filename").focus().val(filename);
+		$("#download-filename").val(filename).focus().select();
 
 	} else {
 		alert("You have to enter the passphrase to decrypt the file.");
@@ -348,7 +353,7 @@ function successHandler(response) {
 		// Build the download link.
 		downloadLink = window.location.host + "/download?file=" + fileId;
 		$("#file-link").val(downloadLink).select();
-		$("#file-download").attr("href", downloadLink);
+		$("#file-download").attr("href", "/download?file=" + fileId);
 
 		$('#upload-modal').modal('show');
 	}
