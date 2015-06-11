@@ -377,7 +377,6 @@ function downloadChunkSuccessHandler(response) {
   downloadedChunks.push(response);
 }
 
-
 /* ============================================================================
 ** Utilities.
 ** ==========================================================================*/

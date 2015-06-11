@@ -9,30 +9,20 @@
     <thead>
       <tr>
         <th>Name</th>
-        <th>Type</th>
-        <th>Downloads</th>
         <th>Uploaded</th>
+        <th>User</th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
+    {%for key in files_dict%}
       <tr>
-        <td>file1</td>
-        <td>Image</td>
-        <td>120</td>
-        <td>10 hours ago</td>
+        <td>{{files_dict[key].rsplit('_',1)[1]}}</td>
+        <td>{{datetime.datetime.fromtimestamp((files_dict[key].rsplit('_',1)[0])|int)}}</td>
+        <td>Bla</td>
+        <td><a href="{{ url_for('download', file = key) }}" class="ui pink button">Download</a></td>
       </tr>
-      <tr>
-        <td>file2</td>
-        <td>Document</td>
-        <td>93</td>
-        <td>11 hours ago</td>
-      </tr>
-      <tr>
-        <td>file3</td>
-        <td>Image</td>
-        <td>23</td>
-        <td>1 day ago</td>
-      </tr>
+    {%endfor%}
     </tbody>
   </table>
 </div>
