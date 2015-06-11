@@ -1,4 +1,4 @@
-import os, psycopg2, time, sys, scrypt, random, binascii, base64, json
+import os, psycopg2, time, sys, scrypt, random, binascii, base64, json, datetime
 from flask import Flask, request, session, redirect, url_for, render_template, flash, abort
 from flask.ext.bower import Bower
 from werkzeug import secure_filename
@@ -106,6 +106,7 @@ def generate_csrf_token():
 
 # Register a global function in the Jinja environment of csrf_token() for use in forms
 app.jinja_env.globals['csrf_token'] = generate_csrf_token
+app.jinja_env.globals['datetime'] = datetime
 
 # ROUTES
 
@@ -291,9 +292,7 @@ def registration():
 
 @app.route('/vault')
 def vault():
-
-
-    return render_template("vault.html")
+    return render_template("vault.html", files_dict=files_dict)
 
 @app.route('/test')
 def test():
@@ -359,7 +358,7 @@ def load_all_files():
     cursor.execute('SELECT id, fileaddress FROM files')
 
     for row in cursor.fetchall():
-        files_dict = dict(id=row[0], fileaddress=row[1])
+        files_dict[row[0]] = row[1]
 
 if __name__ == '__main__':
     with app.app_context():
