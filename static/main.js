@@ -177,12 +177,12 @@ function uploadFile() {
   if(!file) {
     return window.alert("Please choose a file.");
   }
+
   // set upload token
   uploadToken = uploadToken();
 
   // Create the initialization vector.
   iv = createIV();
-  console.log("iv: " + iv);
 
   // establish upload session
   $.ajax({
@@ -233,7 +233,6 @@ function doUpload() {
 
   // Get the passphrase chosen by the user.
   passphrase = $('#passphrase').val();
-  console.log("passphrase: " + passphrase);
 
   // Finally encrypt the slices using the passphrase and the iv.
   encryptFile(slices, passphrase);
@@ -334,13 +333,11 @@ function beforeSendHandler() {
 
 function progressHandler(e) {
 	if(e.lengthComputable) {
-		console.log("progress");
+		// handle chunk progress
 	}
 }
 
 function successHandler(response) {
-  console.log(response);
-
 	if (response != uploadToken) {
 		fileId = response.match("^[^_]+(?=_)");
 
@@ -375,7 +372,6 @@ function downloadSuccessHandler(response) {
   iv = responseObject.iv;
 
   doDownload();
-  console.log("download: " + response);
 }
 
 function downloadChunkSuccessHandler(response) {
@@ -385,6 +381,19 @@ function downloadChunkSuccessHandler(response) {
 /* ============================================================================
 ** Utilities.
 ** ==========================================================================*/
+
+// Unique token for upload.
+function uploadToken() {
+
+  function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
+  }
+
+  return s4() + s4() + s4() + s4() +
+    s4() + s4() + new Date().getTime();
+}
 
 // Get query parameters.
 function getParameterByName(name) {
@@ -433,17 +442,6 @@ function randomString(length, chars) {
 	}
 
 	return result;
-}
-
-// Unique token for upload.
-function uploadToken() {
-  function s4() {
-    return Math.floor((1 + Math.random()) * 0x10000)
-      .toString(16)
-      .substring(1);
-  }
-  return s4() + s4() + s4() + s4() +
-    s4() + s4() + new Date().getTime();
 }
 
 // Convert uint8array to binary string.
