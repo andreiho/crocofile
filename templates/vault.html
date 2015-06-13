@@ -14,7 +14,7 @@
       </tr>
     </thead>
     <tbody>
-    {% for key in files_dict %}
+    {% for key in files_dict | sort(true) %}
       <tr>
         <td>{{ files_dict[key].rsplit('_',1)[1] }}</td>
         <td>
