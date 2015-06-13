@@ -11,14 +11,14 @@
 	<input name=_csrf_token type=hidden value="{{ csrf_token() }}">
         <div class="field {{ fieldError }}">
           <div class="ui left icon input">
-            <input type="text" placeholder="Username" name="username" autofocus>
+            <input type="text" placeholder="Username" name="username" required autofocus>
             <i class="user icon"></i>
           </div>
         </div>
 
         <div class="field {{ fieldError }}">
           <div class="ui left icon input">
-            <input type="password" placeholder="Password" name="password">
+            <input type="password" placeholder="Password" name="password" required>
             <i class="lock icon"></i>
           </div>
         </div>
