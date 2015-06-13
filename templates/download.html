@@ -29,24 +29,11 @@
           <div class="ui tiny header">Type your desired filename:</div>
           <div class="ui action input">
             <input type="text" id="download-filename">
-            <button id="download-finalize" class="ui pink button" onclick="downloadFile()">Finalize</button>
+            <button id="download-finalize" class="ui pink button" onclick="downloadFile()">Download</button>
           </div>
+          <a href="#" id="download" class="hide"></a>
         </div>
       </div>
-    </div>
-  </div>
-
-  <div class="ui small modal" id="download-modal">
-    <i class="close icon"></i>
-    <div class="content">
-      <h2 class="ui center aligned circular icon header">
-        <i class="check icon"></i>
-        <div class="content">
-          Your file is ready.
-        </div>
-      </h2>
-      <div class="ui hidden divider"></div>
-      <a href="#" id="download" class="ui huge pink fluid button">Download it</a>
     </div>
   </div>
 

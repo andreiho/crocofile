@@ -321,9 +321,10 @@ function downloadFile() {
   var downloadURL = window.URL.createObjectURL(blob);
 
 	filename = $("#download-filename").val();
-	$('#download-modal').modal('show');
+	//$('#download-modal').modal('show');
 
-  $("#download").attr( { href: downloadURL, download: filename } );
+  $("#download").attr({ href: downloadURL, download: filename });
+	$("#download")[0].click();
 }
 
 /* ============================================================================
