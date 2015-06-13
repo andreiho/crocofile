@@ -38,6 +38,9 @@ $("input[type='text'].select").click(function() {
    $(this).select();
 });
 
+// Convert timestamps into timeago format.
+$("abbr.timeago").timeago();
+
 /* ============================================================================
 ** File download.
 ** ==========================================================================*/

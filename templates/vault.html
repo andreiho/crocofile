@@ -5,24 +5,33 @@
 <div class="ui left aligned relaxed form segment">
   <h4 class="ui header">Public vault</h4>
 
-  <table class="ui basic padded table">
+  <table class="ui unstackable striped padded table">
     <thead>
       <tr>
-        <th>Name</th>
-        <th>Uploaded</th>
-        <th>User</th>
-        <th></th>
+        <th class="six wide">Name</th>
+        <th class="six wide">Uploaded</th>
+        <th class="four wide right aligned"></th>
       </tr>
     </thead>
     <tbody>
-    {%for key in files_dict%}
+    {% for key in files_dict %}
       <tr>
-        <td>{{files_dict[key].rsplit('_',1)[1]}}</td>
-        <td>{{datetime.datetime.fromtimestamp((files_dict[key].rsplit('_',1)[0])|int)}}</td>
-        <td>Bla</td>
-        <td><a href="{{ url_for('download', file = key) }}" class="ui pink button">Download</a></td>
+        <td>{{ files_dict[key].rsplit('_',1)[1] }}</td>
+        <td>
+          <abbr class="timeago" title="{{ datetime.datetime.fromtimestamp((files_dict[key].rsplit('_',1)[0])|int) }}"></abbr>
+        </td>
+        <td class="right aligned">
+          <div class="ui large pink buttons">
+            <a href="#" class="ui icon button">
+              <i class="key icon"></i>
+            </a>
+            <a href="{{ url_for('download', file = key) }}" class="ui icon button">
+              <i class="download icon"></i>
+            </a>
+          </div>
+        </td>
       </tr>
-    {%endfor%}
+    {% endfor %}
     </tbody>
   </table>
 </div>
