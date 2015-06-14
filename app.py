@@ -5,7 +5,7 @@ from werkzeug import secure_filename
 from flask_sslify import SSLify
 
 app = Flask(__name__)
-sslify = SSLify(app)
+#sslify = SSLify(app)
 
 # load config
 app.config.from_object(os.environ['APP_SETTINGS'])
@@ -205,6 +205,12 @@ def registration():
 @app.route('/vault')
 def vault():
     return render_template("vault.html")
+
+@app.route('/logout')
+def logout():
+    session.pop('logged_in', None)
+    flash('You were logged out.')
+    return redirect('/')
 
 # ROUTES END
 
