@@ -87,8 +87,6 @@ def csrf_protect():
         token = session['_csrf_token']
 
         if 'X-Csrf-Token' in request.headers:
-            print(request.headers['X-Csrf-Token'])
-            print(token)
             if request.headers['X-Last-Request'] == "true":
                 token = session.pop('_csrf_token', None)
             if not token or token != request.headers['X-Csrf-Token']:
@@ -149,9 +147,6 @@ def upload():
             ipaddress = request.remote_addr
             iv = request.headers['X-IV']
             upload_token = request.headers['X-Upload-Token']
-            print(ipaddress)
-            print(iv)
-            print(filename)
 
             try:
                 cursor.execute('INSERT INTO files (ipaddress, iv, fileaddress) VALUES (%s, %s, %s) RETURNING id', (ipaddress, iv, filename))
@@ -188,7 +183,6 @@ def downloadHandler():
             result = cursor.fetchone()
 
             iv = result[2]
-            print(result[3])
             filename = fileid + "_" + result[3]
             chunks = os.listdir(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
@@ -196,12 +190,13 @@ def downloadHandler():
 
         else:
             chunknumber = int(request.headers['X-Requested-Chunk'])
-            print(chunknumber)
             filename = request.headers['X-File-Name']
-            chunks = os.listdir(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            chunk = None
+            with open(os.path.join(app.config['UPLOAD_FOLDER'], filename, str(chunknumber))) as f:
+                print (f)
+                chunk = f.read()
 
-            with open(os.path.join(app.config['UPLOAD_FOLDER'], filename, chunks[chunknumber])) as f:
-                return f.read()
+            return json.dumps({'number': chunknumber, 'chunk': chunk}) 
 
 
     return "failed"

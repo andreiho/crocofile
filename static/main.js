@@ -398,7 +398,8 @@ function downloadSuccessHandler(response) {
 }
 
 function downloadChunkSuccessHandler(response) {
-  downloadedChunks.push(response);
+  var responseObject = JSON.parse(response);
+  downloadedChunks[responseObject.number] = responseObject.chunk;
 }
 
 /* ============================================================================
