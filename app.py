@@ -89,7 +89,7 @@ def csrf_protect():
             if request.headers['X-Last-Request'] == "true":
                 token = session.pop('_csrf_token', None)
             if not token or token != request.headers['X-Csrf-Token']:
-                abort(403)    
+                abort(403)
         else:
             token = session.pop('_csrf_token', None)
             if not token or token != request.form.get('_csrf_token'):
@@ -107,7 +107,7 @@ app.jinja_env.globals['csrf_token'] = generate_csrf_token
 # ROUTES
 
 @app.route('/', methods=['GET', 'POST'])
-def index():    
+def index():
     return render_template("index.html")
 
     session.pop('logged_in', None)
@@ -188,9 +188,8 @@ def registration():
 
         if len(username) > 30:
             userLenError = "error"
-            userLenErrorMsg = "Username too long"
-            return render_template('registration.html', userLenError=passError, userLenErrorMsg=passErrorMsg)
-
+            userLenErrorMsg = "This username is too long."
+            return render_template('registration.html', userLenError=userLenError, userLenErrorMsg=userLenErrorMsg)
 
         if password != password_repeat:
             passError = "error"
@@ -208,7 +207,7 @@ def registration():
         except:
             return render_template('registration.html', someError="Something went wrong. Try again or tell us, if you are sweet?")
         conn.commit()
-        load_all_users()    
+        load_all_users()
         flash('You have been registered.')
         return redirect(url_for('login'))
 
