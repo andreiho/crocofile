@@ -23,6 +23,11 @@ print ("Connected!\n")
 
 # users get loaded before the app gets started (on user table changes)
 users_dict = {}
+# usernames get loaded before the app gets started (on user table changes)
+users_names_dict = {}
+# online users get loaded before the app gets started (on user table changes)
+users_online_dict = {}
+
 # files get loaded before the app gets started (on file table changes)
 files_dict = {}
 # files usernames get loaded before the app gets started (on file table changes)
@@ -161,7 +166,7 @@ def upload():
             except:
                 conn.rollback()
                 return "failed"
-                
+
             session[upload_token] = filename
             load_all_files()
             return upload_token
@@ -198,14 +203,18 @@ def downloadHandler():
             with open(os.path.join(app.config['UPLOAD_FOLDER'], filename, str(chunknumber))) as f:
                 chunk = f.read()
 
-            return json.dumps({'number': chunknumber, 'chunk': chunk}) 
+            return json.dumps({'number': chunknumber, 'chunk': chunk})
 
 
     return "failed"
 
 @app.route('/logout')
 def logout():
+    username = session['username']
+    users_online_dict.pop(username, None)
+
     session.pop('logged_in', None)
+
     flash('You were logged out.')
     return redirect('/')
 
@@ -247,6 +256,10 @@ def login():
             return render_template('login.html', error=error)
 
         session['logged_in'] = True
+        session['username'] = username
+
+        users_online_dict[username] = username
+
         flash('You were logged in.')
         return redirect(url_for('index'))
 
@@ -283,9 +296,8 @@ def registration():
 
         if len(username) > 30:
             userLenError = "error"
-            userLenErrorMsg = "Username too long"
-            return render_template('registration.html', userLenError=passError, userLenErrorMsg=passErrorMsg)
-
+            userLenErrorMsg = "This username is too long."
+            return render_template('registration.html', userLenError=userLenError, userLenErrorMsg=userLenErrorMsg)
 
         if password != password_repeat:
             passError = "error"
@@ -301,7 +313,7 @@ def registration():
         try:
             cursor.execute('INSERT INTO users (username, password) VALUES (%s, %s)', (username, password))
         except:
-            cursor.rollback()
+            conn.rollback()
             return render_template('registration.html', someError="Something went wrong. Try again or tell us, if you are sweet?")
         conn.commit()
         load_all_users()
@@ -315,6 +327,10 @@ def vault():
     return render_template("vault.html", files_dict=files_dict, files_usernames_dict=files_usernames_dict)
 
 # ROUTES END
+
+@app.context_processor
+def inject_users():
+    return dict(users_names_dict=users_names_dict, users_online_dict=users_online_dict)
 
 def add_to_wrong_username(ip):
     global wrong_username_dict
@@ -367,7 +383,7 @@ def load_all_users():
 
     for row in cursor.fetchall():
         users_dict[row[1]] = UserContext(row[0], row[1], row[2])
-
+        users_names_dict[row[0]] = row[1]
 
 def load_all_files():
     global files_dict
