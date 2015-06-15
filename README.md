@@ -29,7 +29,7 @@ CREATE TABLE users (id SERIAL PRIMARY KEY, username varchar(30) UNIQUE not null,
 **Create the files table:**
 
 ```
-CREATE TABLE files (id SERIAL PRIMARY KEY, ipaddress inet not null, iv varchar(32) not null, fileaddress varchar(90));
+CREATE TABLE files (id SERIAL PRIMARY KEY, ipaddress inet not null, iv varchar(32) not null, fileaddress varchar(90), username varchar(30));
 ```
 
 **Add these lines to your environment:**
@@ -101,8 +101,14 @@ export APP_SETTINGS="config.ProductionConfig"
 export CONN_STRING="host='localhost' dbname='crocofile' user='crocofile' password='password'"
 ```
 
-**Run the app:**
+**Kill existing uwsgi processes if available:**
 
 ```
-uwsgi --ini /var/www/crocofile/crocofile.ini
+sudo killall -s INT uwsgi
+```
+
+**Run the app from /var/www/crocofile/:**
+
+```
+uwsgi --emperor app.ini --daemonize /var/log/uwsgi/emperor.log
 ```
