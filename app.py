@@ -149,6 +149,9 @@ def upload():
             ipaddress = request.remote_addr
             iv = request.headers['X-IV']
             upload_token = request.headers['X-Upload-Token']
+            print(ipaddress)
+            print(iv)
+            print(filename)
 
             cursor.execute('INSERT INTO files (ipaddress, iv, fileaddress) VALUES (%s, %s, %s) RETURNING id', (ipaddress, iv, filename))
             file_id = cursor.fetchone()
@@ -157,7 +160,7 @@ def upload():
             filename = str(file_id) + "_" + filename
 
             session[upload_token] = filename
-
+            load_all_files()
             return upload_token
 
     return "failed"

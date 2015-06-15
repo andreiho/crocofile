@@ -106,14 +106,16 @@ function encryptFile(slices, passphrase) {
 		};
 
 		value.readAsArrayBuffer(slices[index]);
-
+    console.log("Reader Array Length: " + readerArray.length);
 		readerArray[readerArray.length - 1].onloadend = function(e) {
+      console.log("Encrypted Slices Length: " + encryptedSlices.length);
 
 			if (encryptedSlices.length == slices.length) {
 
 				encryptedSlices.push(aesEncryptor.finalize().toString(CryptoJS.enc.Base64));
 
 				$.each(encryptedSlices, function(index, value) {
+          console.log("uploading slice: " + index);
 
           if (index == encryptedSlices.length -1) {
             lastRequest = "true";
