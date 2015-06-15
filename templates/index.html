@@ -4,15 +4,15 @@
 
 <div class="ui center aligned relaxed segment">
   <h4 class="ui disabled header">
-  Choose a strong passphrase or use the recommended generated one.
+    Choose a strong passphrase or use the recommended generated one.
   </h4>
 
   <div class="ui hidden divider"></div>
 
   <div class="ui two column centered grid">
     <div class="column">
-      <form enctype="multipart/form-data" class="ui form" action="{{ url_for('index') }}" method="post">
-	<input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+      <form enctype="multipart/form-data" id="upload-form" class="ui form" action="{{ url_for('index') }}" method="post">
+        <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
         <div class="field">
           <div class="ui left icon action input">
             <i class="key icon"></i>
@@ -33,7 +33,9 @@
         </div>
 
         <div class="center">
-          <label for="file-input" class="huge pink ui right labeled icon button">
+          <label for="file-input" class="huge pink ui right labeled icon button tip"
+                 data-content="Tip: Try to upload not so large files."
+                 data-variation="inverted very wide">
             <i type="submit" class="upload icon" id="upload-submit"></i>
             Choose a file
           </label>
@@ -41,14 +43,31 @@
         </div>
       </form>
 
-      <div class="ui hidden divider"></div>
-
-      <!-- <div class="ui small pink progress" id="upload-progress">
-        <div class="bar">
-          <div class="progress"></div>
+      <div class="ui small modal" id="upload-modal">
+        <i class="close icon"></i>
+        <div class="header">
+          <h2 class="ui small header">
+            <i class="check icon"></i>
+            <div class="content">
+              Your file is ready.
+            </div>
+          </h2>
         </div>
-        <div class="label">Progress bar for the upload. Not working yet.</div>
-      </div> -->
+        <div class="content">
+          <div class="ui tiny header">Your file's passphrase is:</div>
+          <div class="ui fluid input">
+            <input class="select" type="text" id="file-passphrase" readonly>
+          </div>
+          <div class="ui tiny header">Your file can be downloaded at:</div>
+          <div class="ui fluid action input">
+            <input class="select" type="text" id="file-link" readonly>
+            <a href="#" target="_blank" id="file-download" class="ui pink button">
+              Go there
+            </a>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 

@@ -5,34 +5,37 @@
 <div class="ui left aligned relaxed form segment">
   <h4 class="ui header">Public vault</h4>
 
-  <table class="ui basic padded table">
+  <table class="ui unstackable striped padded table">
     <thead>
       <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Downloads</th>
-        <th>Uploaded</th>
+        <th class="six wide">Name</th>
+        <th class="six wide">Uploaded</th>
+        <th class="four wide right aligned"></th>
       </tr>
     </thead>
     <tbody>
+    {% for key in files_dict | sort(true) %}
       <tr>
-        <td>file1</td>
-        <td>Image</td>
-        <td>120</td>
-        <td>10 hours ago</td>
+        <td>{{ files_dict[key].rsplit('_',1)[1] }}</td>
+        <td>
+          <abbr class="timeago" title="{{ datetime.datetime.fromtimestamp((files_dict[key].rsplit('_',1)[0])|int) }}"></abbr>
+        </td>
+        <td class="right aligned">
+          <div class="ui large pink buttons">
+            <a href="#" class="ui icon button">
+              <i class="key icon"></i>
+            </a>
+            <a href="{{ url_for('download', file = key) }}" class="ui icon button">
+              <i class="download icon"></i>
+            </a>
+          </div>
+        </td>
+        {% else %}
+        <td>
+          There are no files here. <a href="/">Upload</a> the first one.
+        </td>
       </tr>
-      <tr>
-        <td>file2</td>
-        <td>Document</td>
-        <td>93</td>
-        <td>11 hours ago</td>
-      </tr>
-      <tr>
-        <td>file3</td>
-        <td>Image</td>
-        <td>23</td>
-        <td>1 day ago</td>
-      </tr>
+    {% endfor %}
     </tbody>
   </table>
 </div>
