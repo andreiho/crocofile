@@ -41,6 +41,13 @@ $("input[type='text'].select").click(function() {
 // Convert timestamps into timeago format.
 $("abbr.timeago").timeago();
 
+// Show a tip when hovering over the file input.
+$('.tip')
+	.popup({
+		position : 'right center',
+	})
+;
+
 /* ============================================================================
 ** File download.
 ** ==========================================================================*/
