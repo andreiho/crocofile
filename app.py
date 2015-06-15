@@ -25,6 +25,8 @@ print ("Connected!\n")
 users_dict = {}
 # files get loaded before the app gets started (on file table changes)
 files_dict = {}
+# files usernames get loaded before the app gets started (on file table changes)
+files_usernames_dict = {}
 
 # mapping an IP (string) -> username attempts (integer)
 wrong_username_dict = {}
@@ -144,12 +146,13 @@ def upload():
 
             filename = secure_filename(request.headers['X-File-Name'])
             filename = str(int(time.time())) + "_" + filename
+            username = request.headers['X-User-Name']
             ipaddress = request.remote_addr
             iv = request.headers['X-IV']
             upload_token = request.headers['X-Upload-Token']
 
             try:
-                cursor.execute('INSERT INTO files (ipaddress, iv, fileaddress) VALUES (%s, %s, %s) RETURNING id', (ipaddress, iv, filename))
+                cursor.execute('INSERT INTO files (ipaddress, iv, fileaddress, username) VALUES (%s, %s, %s, %s) RETURNING id', (ipaddress, iv, filename, username))
                 file_id = cursor.fetchone()
                 file_id = file_id[0]
                 conn.commit()
@@ -193,7 +196,6 @@ def downloadHandler():
             filename = request.headers['X-File-Name']
             chunk = None
             with open(os.path.join(app.config['UPLOAD_FOLDER'], filename, str(chunknumber))) as f:
-                print (f)
                 chunk = f.read()
 
             return json.dumps({'number': chunknumber, 'chunk': chunk}) 
@@ -310,7 +312,7 @@ def registration():
 
 @app.route('/vault')
 def vault():
-    return render_template("vault.html", files_dict=files_dict)
+    return render_template("vault.html", files_dict=files_dict, files_usernames_dict=files_usernames_dict)
 
 # ROUTES END
 
@@ -369,10 +371,11 @@ def load_all_users():
 
 def load_all_files():
     global files_dict
-    cursor.execute('SELECT id, fileaddress FROM files')
+    cursor.execute('SELECT id, fileaddress, username FROM files')
 
     for row in cursor.fetchall():
         files_dict[row[0]] = row[1]
+        files_usernames_dict[row[0]] = row[2]
 
 if __name__ == '__main__':
     with app.app_context():

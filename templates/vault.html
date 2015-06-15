@@ -8,8 +8,9 @@
   <table class="ui unstackable striped padded table">
     <thead>
       <tr>
-        <th class="six wide">Name</th>
-        <th class="six wide">Uploaded</th>
+        <th class="fdur wide">Name</th>
+        <th class="four wide">Uploaded</th>
+        <th class="four wide">Uploaded By</th>
         <th class="four wide right aligned"></th>
       </tr>
     </thead>
@@ -19,6 +20,9 @@
         <td>{{ files_dict[key].rsplit('_',1)[1] }}</td>
         <td>
           <abbr class="timeago" title="{{ datetime.datetime.fromtimestamp((files_dict[key].rsplit('_',1)[0])|int) }}"></abbr>
+        </td>
+        <td>
+        {{ files_usernames_dict[key]}}
         </td>
         <td class="right aligned">
           <div class="ui large pink buttons">
