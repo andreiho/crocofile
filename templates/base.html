@@ -13,6 +13,26 @@
 <script src="{{ url_for('static', filename='bower_components/cryptojslib/rollups/aes.js') }}"></script>
 <script src="{{ url_for('static', filename='utils/u8array.js') }}"></script>
 
+<div class="ui vertical inverted sidebar menu left uncover">
+  <div class="item">
+    <h4 class="ui inverted header">
+      Users
+    </h4>
+  </div>
+  {% for key in users_names_dict %}
+  <a class="item">
+
+    {% if users_names_dict[key] in users_online_dict %}
+      <i class="green circle icon"></i>
+    {% else %}
+      <i class="circle icon"></i>
+    {% endif %}
+
+    <span>{{ users_names_dict[key] }}</span>
+  </a>
+  {% endfor %}
+</div>
+
 <div class="page">
   <div class="ui grid">
     <div class="row">
@@ -30,29 +50,36 @@
     </div>
   </div>
 
-  <div class="ui page grid main">
-    {% for message in get_flashed_messages() %}
-    <div class="row">
-      <div class="column padding-reset">
-        <div class="ui message">
-          <i class="close icon"></i>
-          <div>{{ message }}</div>
+  <div class="pusher">
+    <div class="ui page grid main offset">
+
+      {% for message in get_flashed_messages() %}
+      <div class="row">
+        <div class="column padding-reset">
+          <div class="ui message">
+            <i class="close icon"></i>
+            <div>{{ message }}</div>
+          </div>
         </div>
       </div>
-    </div>
-    {% endfor %}
-  </div>
+      {% endfor %}
 
-
-  <div class="ui page grid main">
-    <div class="center aligned row">
-      <div class="column padding-reset">
-        {% block body %}
-        <!-- Content goes here -->
-        {% endblock %}
+      <div class="center aligned row">
+        <div class="column padding-reset">
+          {% block body %}
+          <!-- Content goes here -->
+          {% endblock %}
+        </div>
       </div>
+
     </div>
   </div>
+
+</div>
+
+<div class="ui black big launch right attached fixed button">
+  <i class="chat icon"></i>
+  <span class="text">Users</span>
 </div>
 
 <script src="{{ url_for('static', filename='main.js') }}"></script>
