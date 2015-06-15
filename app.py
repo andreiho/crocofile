@@ -205,6 +205,7 @@ def registration():
         try:
             cursor.execute('INSERT INTO users (username, password) VALUES (%s, %s)', (username, password))
         except:
+            conn.rollback()	
             return render_template('registration.html', someError="Something went wrong. Try again or tell us, if you are sweet?")
         conn.commit()
         load_all_users()
