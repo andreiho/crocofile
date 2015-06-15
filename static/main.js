@@ -329,7 +329,6 @@ function downloadFile() {
   var downloadURL = window.URL.createObjectURL(blob);
 
   filename = $("#download-filename").val();
-  //$('#download-modal').modal('show');
 
   $("#download").attr({ href: downloadURL, download: filename });
   $("#download")[0].click();
@@ -368,7 +367,15 @@ function successHandler(response) {
     $("#file-link").val(downloadLink).select();
     $("#file-download").attr("href", "/download?file=" + fileId);
 
+    // Show the modal.
     $('#upload-modal').modal('show');
+
+    // Reload page to refresh tokens on modal closed.
+    $('#upload-modal').modal({
+      onHidden: function() {
+        window.location.reload();
+      }
+    });
   }
 }
 
