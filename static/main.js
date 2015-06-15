@@ -310,6 +310,7 @@ function decryptChunks() {
 
     $("#download-filename").val(filename).focus().select();
 
+
   } else {
     alert("You have to enter the passphrase to decrypt the file.");
   }
@@ -332,6 +333,7 @@ function downloadFile() {
 
   $("#download").attr({ href: downloadURL, download: filename });
   $("#download")[0].click();
+
 }
 
 /* ============================================================================
@@ -343,14 +345,17 @@ function beforeSendHandler() {
 }
 
 function progressHandler(e) {
+
   if(e.lengthComputable) {
     // handle chunk progress
   }
 }
 
+
+
 function successHandler(response) {
-  if (response != uploadToken) {
-    fileId = response.match("^[^_]+(?=_)");
+	if (response != uploadToken) {
+		fileId = response.match("^[^_]+(?=_)");
 
     // Hide the loading state.
     $("#upload-form").removeClass("loading");

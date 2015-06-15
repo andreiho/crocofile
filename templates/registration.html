@@ -12,7 +12,7 @@
 
         <div class="field {{ userError }}">
           <div class="ui left icon input">
-            <input type="text" placeholder="Username" name="username" autofocus>
+            <input type="text" placeholder="Username" name="username" required autofocus>
             <i class="user icon"></i>
           </div>
           {% if userError %}
@@ -24,7 +24,7 @@
 
         <div class="field {{ lenError }}">
           <div class="ui left icon input">
-            <input type="password" placeholder="Password" name="password">
+            <input type="password" placeholder="Password" name="password" required>
             <i class="lock icon"></i>
           </div>
           {% if lenError %}
@@ -36,7 +36,7 @@
 
         <div class="field {{ passError }}">
           <div class="ui left icon input">
-            <input type="password" placeholder="Repeat Password" name="password-repeat">
+            <input type="password" placeholder="Repeat Password" name="password-repeat" required>
             <i class="lock icon"></i>
           </div>
           {% if passError %}
