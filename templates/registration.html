@@ -12,7 +12,7 @@
 
         <div class="field {{ userError }}">
           <div class="ui left icon input">
-            <input type="text" placeholder="Username" name="username" required autofocus>
+            <input type="text" placeholder="Username" name="username" maxlength="30" required autofocus>
             <i class="user icon"></i>
           </div>
           {% if userError %}
