@@ -21,3 +21,7 @@ body {
 abbr {
   border-bottom: none !important;
 }
+
+p {
+  line-height: 1.66em;
+}

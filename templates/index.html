@@ -2,12 +2,20 @@
 
 {% block body %}
 
-<div class="ui center aligned relaxed segment">
-  <h4 class="ui disabled header">
-    Choose a strong passphrase or use the recommended generated one.
+<div class="ui centered">
+  <h4 class="ui header">
+    Welcome to crocofile, the file-sharing service that enables you to share files while keeping them private from others.
   </h4>
-
+  <p style="line-heigth: 24px;">
+    We encrypt your files in the browser, before they are uploaded. Start by choosing a strong passphrase or use the
+    recommended generated one. We will encrypt your file using this passphrase, so the stronger, the better. Remember to
+    write it down and keep it safe. When the process is finished, you will receive a link that
+    you can share with others. You will also need to share the file's password with them, otherwise they won't be able to download the file.
+  </p>
   <div class="ui hidden divider"></div>
+</div>
+
+<div class="ui center aligned relaxed segment">
 
   <div class="ui two column centered grid">
     <div class="column">
@@ -24,14 +32,16 @@
         <div class="field">
           <div class="ui left icon input">
             <i class="file txt icon"></i>
-            <input type="text" placeholder="Enter a name for your file..." name="filename" id="filename">
+            <input type="text" placeholder="Enter a new name for your file..." name="filename" id="filename">
           </div>
         </div>
 
         <div class="field">
           <div class="ui left icon input">
             <i class="file txt icon"></i>
-            <input type="text" placeholder="Enter your username if you want to share..." name="username" id="username">
+            <input type="text" placeholder="Enter your username if you want to share your file..." name="username" id="username"
+                    data-content="To enable other users to ask your for your file's passphrase, enter your username. Otherwise you will only be able to share your file with the people you choose."
+                    data-variation="inverted">
           </div>
         </div>
 
