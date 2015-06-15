@@ -260,13 +260,18 @@ def registration():
     error = None
 
     userError = None
-    userError = None
+    userErrorMsg = None
+
+    userLenError = None
+    userLenErrorMsg = None
 
     passError = None
-    passError = None
+    passErrorMsg = None
 
     lenError = None
-    lenError = None
+    lenErrorMsg = None
+
+    someError = None
 
     if request.method == 'POST':
         username = request.form['username'].strip()
@@ -279,6 +284,12 @@ def registration():
             userErrorMsg = "This username already exists."
             return render_template('registration.html', userError=userError, userErrorMsg=userErrorMsg)
 
+        if len(username) > 30:
+            userLenError = "error"
+            userLenErrorMsg = "Username too long"
+            return render_template('registration.html', userLenError=passError, userLenErrorMsg=passErrorMsg)
+
+
         if password != password_repeat:
             passError = "error"
             passErrorMsg = "Passwords do not match."
@@ -290,7 +301,10 @@ def registration():
             return render_template('registration.html', lenError=lenError, lenErrorMsg=lenErrorMsg)
 
         password = binascii.hexlify(hash_password(password)).decode('utf-8')
-        cursor.execute('INSERT INTO users (username, password) VALUES (%s, %s)', (username, password))
+        try:
+            cursor.execute('INSERT INTO users (username, password) VALUES (%s, %s)', (username, password))
+        except:
+            return render_template('registration.html', someError="Something went wrong. Try again or tell us, if you are sweet?")
         conn.commit()
         load_all_users()
         flash('You have been registered.')
@@ -302,9 +316,11 @@ def registration():
 def vault():
     return render_template("vault.html", files_dict=files_dict)
 
-@app.route('/test')
-def test():
-    return render_template("test.html")
+@app.route('/logout')
+def logout():
+    session.pop('logged_in', None)
+    flash('You were logged out.')
+    return redirect('/')
 
 # ROUTES END
 

@@ -3,14 +3,8 @@
 ** ==========================================================================*/
 
 // Global variable declarations.
-var alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+@!€§|~[]";
-var filename;
-var uploadToken;
-var iv;
-var downloadChunks;
-var downloadedChunks = [];
-var decryptedChunks = [];
 var csrfToken;
+<<<<<<< HEAD
 var lastRequest;
 var fileId;
 var passphrase;
@@ -22,10 +16,16 @@ $('#generate').on('click', newPass); // Generate random passphrase on user reque
 $('#dec-submit').on('click', decryptChunks); // Decrypt downloaded chunks.
 $('#download-submit').on('click', downloadFile); // Download file.
 $('#file-input').change(uploadFile); // Upload a file on change.
+=======
+>>>>>>> draft
 
 // Close alert messages.
 $('.message .close').on('click', function() {
 	$(this).closest('.message').fadeOut();
+});
+
+$("#file-input").change(function() {
+  alert("Your IP address has been logged. We know where you live. Just kidding. Only registration/login is available now. ;)");
 });
 
 // Close alerts after some seconds.
@@ -33,6 +33,7 @@ setTimeout(function () {
 	$('.message').fadeOut();
 }, 5000);
 
+<<<<<<< HEAD
 /* ============================================================================
 ** File download.
 ** ==========================================================================*/
@@ -482,3 +483,6 @@ function convertWordArrayToUint8Array(wordArray) {
 
   return u8_array;
 }
+=======
+
+>>>>>>> draft
