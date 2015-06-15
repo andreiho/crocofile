@@ -304,6 +304,7 @@ def registration():
         try:
             cursor.execute('INSERT INTO users (username, password) VALUES (%s, %s)', (username, password))
         except:
+            cursor.rollback()
             return render_template('registration.html', someError="Something went wrong. Try again or tell us, if you are sweet?")
         conn.commit()
         load_all_users()
@@ -315,12 +316,6 @@ def registration():
 @app.route('/vault')
 def vault():
     return render_template("vault.html", files_dict=files_dict)
-
-@app.route('/logout')
-def logout():
-    session.pop('logged_in', None)
-    flash('You were logged out.')
-    return redirect('/')
 
 # ROUTES END
 
