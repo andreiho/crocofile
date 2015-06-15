@@ -350,8 +350,6 @@ function progressHandler(e) {
   }
 }
 
-
-
 function successHandler(response) {
 	if (response != uploadToken) {
 		fileId = response.match("^[^_]+(?=_)");
@@ -360,11 +358,11 @@ function successHandler(response) {
     $("#upload-form").removeClass("loading");
 
     // Output the passphrase.
-    $("#file-passphrase").val(passphrase);
+    $("#file-passphrase").val(passphrase).select();
 
     // Build the download link.
     downloadLink = window.location.host + "/download?file=" + fileId;
-    $("#file-link").val(downloadLink).select();
+    $("#file-link").val(downloadLink);
     $("#file-download").attr("href", "/download?file=" + fileId);
 
     // Show the modal.
