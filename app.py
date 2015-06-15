@@ -153,12 +153,17 @@ def upload():
             print(iv)
             print(filename)
 
-            cursor.execute('INSERT INTO files (ipaddress, iv, fileaddress) VALUES (%s, %s, %s) RETURNING id', (ipaddress, iv, filename))
-            file_id = cursor.fetchone()
-            file_id = file_id[0]
-            conn.commit()
-            filename = str(file_id) + "_" + filename
+            try:
+                cursor.execute('INSERT INTO files (ipaddress, iv, fileaddress) VALUES (%s, %s, %s) RETURNING id', (ipaddress, iv, filename))
+                file_id = cursor.fetchone()
+                file_id = file_id[0]
+                conn.commit()
+                filename = str(file_id) + "_" + filename
 
+            except:
+                conn.rollback()
+                return "failed"
+                
             session[upload_token] = filename
             load_all_files()
             return upload_token
