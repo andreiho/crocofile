@@ -2,10 +2,8 @@ import os, psycopg2, time, sys, scrypt, random, binascii, base64, json
 from flask import Flask, request, session, redirect, url_for, render_template, flash, abort
 from flask.ext.bower import Bower
 from werkzeug import secure_filename
-from flask_sslify import SSLify
 
 app = Flask(__name__)
-#sslify = SSLify(app)
 
 # load config
 app.config.from_object(os.environ['APP_SETTINGS'])
@@ -164,13 +162,18 @@ def registration():
     error = None
 
     userError = None
-    userError = None
+    userErrorMsg = None
+
+    userLenError = None
+    userLenErrorMsg = None
 
     passError = None
-    passError = None
+    passErrorMsg = None
 
     lenError = None
-    lenError = None
+    lenErrorMsg = None
+
+    someError = None
 
     if request.method == 'POST':
         username = request.form['username'].strip()
@@ -183,6 +186,12 @@ def registration():
             userErrorMsg = "This username already exists."
             return render_template('registration.html', userError=userError, userErrorMsg=userErrorMsg)
 
+        if len(username) > 30:
+            userLenError = "error"
+            userLenErrorMsg = "Username too long"
+            return render_template('registration.html', userLenError=passError, userLenErrorMsg=passErrorMsg)
+
+
         if password != password_repeat:
             passError = "error"
             passErrorMsg = "Passwords do not match."
@@ -194,7 +203,10 @@ def registration():
             return render_template('registration.html', lenError=lenError, lenErrorMsg=lenErrorMsg)
 
         password = binascii.hexlify(hash_password(password)).decode('utf-8')
-        cursor.execute('INSERT INTO users (username, password) VALUES (%s, %s)', (username, password))
+        try:
+            cursor.execute('INSERT INTO users (username, password) VALUES (%s, %s)', (username, password))
+        except:
+            return render_template('registration.html', someError="Something went wrong. Try again or tell us, if you are sweet?")
         conn.commit()
         load_all_users()    
         flash('You have been registered.')
