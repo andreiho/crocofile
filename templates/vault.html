@@ -8,9 +8,10 @@
   <table class="ui unstackable striped padded table">
     <thead>
       <tr>
-        <th class="six wide">Name</th>
-        <th class="six wide">Uploaded</th>
-        <th class="four wide right aligned"></th>
+        <th class="five wide">Name</th>
+        <th class="four wide">Uploaded</th>
+        <th class="four wide">Uploaded By</th>
+        <th class="three wide right aligned"></th>
       </tr>
     </thead>
     <tbody>
@@ -19,6 +20,17 @@
         <td>{{ files_dict[key].rsplit('_',1)[1] }}</td>
         <td>
           <abbr class="timeago" title="{{ datetime.datetime.fromtimestamp((files_dict[key].rsplit('_',1)[0])|int) }}"></abbr>
+        </td>
+        <td>
+        {% if files_usernames_dict[key] %}
+
+        {{ files_usernames_dict[key] }}
+
+        {% else %}
+
+        Anonymous
+
+        {% endif %}
         </td>
         <td class="right aligned">
           <div class="ui large pink buttons">
@@ -31,7 +43,7 @@
           </div>
         </td>
         {% else %}
-        <td>
+        <td colspan="3">
           There are no files here. <a href="/">Upload</a> the first one.
         </td>
       </tr>

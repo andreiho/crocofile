@@ -48,6 +48,14 @@ $('.tip')
   })
 ;
 
+// Show a tip when focusing on the username input.
+$('#username')
+  .popup({
+    on: 'focus',
+    position : 'right center',
+  })
+;
+
 /* ============================================================================
 ** File download.
 ** ==========================================================================*/
@@ -188,6 +196,8 @@ function uploadFile() {
     return window.alert("Please choose a file.");
   }
 
+  var username = $('#username').val();
+
   // set upload token
   uploadToken = uploadToken();
 
@@ -218,7 +228,8 @@ function uploadFile() {
       'X-Csrf-Token' : csrfToken,
       'X-File-Name' : filename,
       'X-Upload-Token' : uploadToken,
-      'X-IV' : iv
+      'X-IV' : iv,
+      'X-User-Name' : username
     },
     processData: false,
     cache: false
