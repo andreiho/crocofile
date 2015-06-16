@@ -38,6 +38,7 @@ wrong_username_dict = {}
 # mapping an IP (string) -> timestamp of timeout over
 wrong_username_timeout = {}
 
+
 # CLASSES
 
 class UserContext():
@@ -108,10 +109,15 @@ def generate_csrf_token():
         session['_csrf_token'] = binascii.hexlify(token).decode('utf-8')
     return session['_csrf_token']
 
+def get_logged_in_user():
+    if 'user_id' in session:
+        return session['user_id']
+    else:
+        return -1
 # Register a global function in the Jinja environment of csrf_token() for use in forms
 app.jinja_env.globals['csrf_token'] = generate_csrf_token
 app.jinja_env.globals['datetime'] = datetime
-app.jinja_env.globals['logged_in'] = -1
+app.jinja_env.globals['logged_in'] = get_logged_in_user
 
 @app.context_processor
 def inject_users():
@@ -218,11 +224,10 @@ def getPublicKey():
 
     if request.method == 'POST':
         user_id = request.headers['X-User-Id']
-        print(user_id)
         try:
             cursor.execute('SELECT public_key FROM users WHERE id = (%s);', (user_id,))
             result = cursor.fetchone()
-            print (result[0])
+
             if result[0] == None:
                 return "offline"
             else:
@@ -238,8 +243,8 @@ def logout():
     username = session['username']
     users_online_dict.pop(username, None)
 
+    session.pop('user_id', None)
     session.pop('logged_in', None)
-    app.jinja_env.globals['logged_in'] = -1
     flash('You were logged out.')
     return redirect('/')
 
@@ -282,7 +287,6 @@ def login():
             return render_template('login.html', error=error)
 
         session['logged_in'] = True
-        app.jinja_env.globals['logged_in'] = user._id
         session['user_id'] = user._id
 
         users_online_dict[username] = username

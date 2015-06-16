@@ -86,6 +86,11 @@ $(document).ready(function() {
 
   if (userId > -1) {
     peer = new Peer(userId,{key: 'tnyh1aenu1y8pvi'});
+    var conn = peer.connect(receiverUserId);
+    conn.on('open', function(){
+      conn.send('hi!');
+    });
+
   }
 
   if (href.indexOf('?') > -1) {
@@ -444,8 +449,10 @@ function getPublicKeySuccessHandler(response) {
   }
   else {
     $("#idiot").show();
-    var conn = peer.connect(receiverUserId);
-    
+    conn = peer.connect(receiverUserId);
+    conn.on('open', function(){
+        conn.send('hi!');
+    });
   }
 }
 /* ============================================================================
