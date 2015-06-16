@@ -112,3 +112,13 @@ sudo killall -s INT uwsgi
 ```
 uwsgi --emperor app.ini --daemonize /var/log/uwsgi/emperor.log
 ```
+
+
+API Key
+------------------------
+
+**PeerJS API Key**
+
+```
+tnyh1aenu1y8pvi
+```

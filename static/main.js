@@ -15,6 +15,11 @@ var lastRequest;
 var fileId;
 var passphrase;
 var downloadLink;
+var userId;
+var peer;
+var keyPair;
+var pki = forge.pki;
+var rsa = pki.rsa;
 
 // Bindings.
 $('#passphrase').val(generatePass()); // Generate random passphrase on page load.
@@ -22,6 +27,7 @@ $('#generate').on('click', newPass); // Generate random passphrase on user reque
 $('#dec-submit').on('click', decryptChunks); // Decrypt downloaded chunks.
 $('#download-submit').on('click', downloadFile); // Download file.
 $('#file-input').change(uploadFile); // Upload a file on change.
+$('#generate-keypair').on('click', setPublicKey);
 
 // Close alert messages.
 $('.message .close').on('click', function() {
@@ -69,6 +75,8 @@ $(document).ready(function() {
   lastRequest = "false";
   csrfToken = document.getElementsByName("_csrf_token")[0].value;
 
+  userId = parseInt($("#userId").html());
+
   var href = window.location.href;
   href = href.substr(href.lastIndexOf('/') + 1);
 
@@ -102,6 +110,9 @@ $(document).ready(function() {
       processData: false,
       cache: false
     });
+  }
+  else if(href == "login") {
+    setPublicKey();
   }
 });
 
@@ -417,6 +428,15 @@ function downloadChunkSuccessHandler(response) {
 }
 
 /* ============================================================================
+** Messaging
+** ==========================================================================*/
+
+function setPublicKey() {
+  keyPair = generateKeyPair();
+  $('#public-key').val(pki.publicKeyToPem(keyPair.publicKey)); 
+}
+
+/* ============================================================================
 ** Utilities.
 ** ==========================================================================*/
 
@@ -520,4 +540,9 @@ function convertWordArrayToUint8Array(wordArray) {
   }
 
   return u8_array;
+}
+
+// generate an RSA key parseInt
+function generateKeyPair() {
+  return rsa.generateKeyPair({bits: 2048, e: 0x10001});
 }

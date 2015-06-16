@@ -8,7 +8,8 @@
       <h4 class="ui dividing header">Login to your account</h4>
 
       <form class="ui form" action="{{ url_for('login') }}" method="post">
-	<input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+	      <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+
         <div class="field {{ fieldError }}">
           <div class="ui left icon input">
             <input type="text" placeholder="Username" name="username" required autofocus>
@@ -20,6 +21,14 @@
           <div class="ui left icon input">
             <input type="password" placeholder="Password" name="password" required>
             <i class="lock icon"></i>
+          </div>
+        </div>
+        
+        <div class="field">
+          <div class="ui left icon action input">
+            <i class="key icon"></i>
+            <input type="text" name="public-key" id="public-key">
+            <div id="generate-keypair" class="ui default submit button">Generate Keypair</div>
           </div>
         </div>
 

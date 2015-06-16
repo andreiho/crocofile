@@ -38,7 +38,6 @@ wrong_username_dict = {}
 # mapping an IP (string) -> timestamp of timeout over
 wrong_username_timeout = {}
 
-
 # CLASSES
 
 class UserContext():
@@ -112,6 +111,10 @@ def generate_csrf_token():
 # Register a global function in the Jinja environment of csrf_token() for use in forms
 app.jinja_env.globals['csrf_token'] = generate_csrf_token
 app.jinja_env.globals['datetime'] = datetime
+
+@app.context_processor
+def inject_users():
+    return dict(users_names_dict=users_names_dict, users_online_dict=users_online_dict)
 
 # ROUTES
 
@@ -231,6 +234,7 @@ def login():
 
         username = request.form['username'].strip()
         password = request.form['password'].strip()
+        public_key = request.form['public-key'].strip()
         ip = request.remote_addr
         username_attempts = 0
 
@@ -256,16 +260,22 @@ def login():
             return render_template('login.html', error=error)
 
         session['logged_in'] = True
-        session['username'] = username
+        session['user_id'] = user._id
 
         users_online_dict[username] = username
+        try:
 
+            cursor.execute('UPDATE users SET public_key = (%s) WHERE id = (%s);', (public_key, user._id,))
+            conn.commit()
+
+        except:
+            conn.rollback()    
         flash('You were logged in.')
         return redirect(url_for('index'))
 
     return render_template('login.html', error=error)
 
-@app.route('/registration', methods=['GET', 'POST'])
+@app.route('/registration', methods=['GET', 'POST']) 
 def registration():
     error = None
 
@@ -327,10 +337,6 @@ def vault():
     return render_template("vault.html", files_dict=files_dict, files_usernames_dict=files_usernames_dict)
 
 # ROUTES END
-
-@app.context_processor
-def inject_users():
-    return dict(users_names_dict=users_names_dict, users_online_dict=users_online_dict)
 
 def add_to_wrong_username(ip):
     global wrong_username_dict
