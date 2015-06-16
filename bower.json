@@ -18,6 +18,7 @@
     "jquery": "~2.1.4",
     "semantic-ui": "~1.12.3",
     "cryptojslib": "~3.1.2",
-    "jquery-timeago": "~1.4.1"
+    "jquery-timeago": "~1.4.1",
+    "forge": "~0.6.30"
   }
 }
