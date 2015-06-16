@@ -84,6 +84,10 @@ $(document).ready(function() {
 
   userId = parseInt($("#logged-in").html());
 
+  if (userId > -1) {
+    peer = new Peer(userId,{key: 'tnyh1aenu1y8pvi'});
+  }
+
   if (href.indexOf('?') > -1) {
     href = href.substr(0,href.indexOf('?'));
   }
@@ -439,8 +443,9 @@ function getPublicKeySuccessHandler(response) {
     alert("An error occured");
   }
   else {
-    peer = new Peer(userId,{key: 'tnyh1aenu1y8pvi'});
     $("#idiot").show();
+    var conn = peer.connect(receiverUserId);
+    
   }
 }
 /* ============================================================================
@@ -484,6 +489,8 @@ function getPublicKey() {
     cache: false
   });
 }
+
+
 
 
 /* ============================================================================
