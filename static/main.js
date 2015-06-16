@@ -77,20 +77,18 @@ $('.sidebar').first()
 // Messaging
 
 $("#message-submit").on('click', function(){
-    console.log("send:");
 
     var conn = peer.connect(peerUserId);
     var data = new Object();
     conn.on('open', function(){
       var msg = $("#textarea").val();
       var md = forge.md.sha1.create();
-      md.update('sign this', 'utf-8');
-      console.log(md);
+      md.update(msg, 'utf-8');
       var signature = privateKey.sign(md);
       data.signature = signature;
       data.message = msg;
       var dataJSON = JSON.stringify(data); 
-      conn.send(data);
+      conn.send(dataJSON);
     });
 });
 
@@ -149,10 +147,10 @@ $(document).ready(function() {
           cache: false
         });
         var md = forge.md.sha1.create();
-        md.update(msg, 'utf8');
+        md.update(data.message, 'utf8');
         var verified = peerPublicKey.verify(md.digest().bytes(), data.signature);
-        console.log(verified);
-        console.log(data.message);
+        console.log("Identity verified:" + verified);
+        console.log("Message:"  + data.message);
       });
     });
   }
