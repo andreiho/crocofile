@@ -13,28 +13,29 @@
 <script src="{{ url_for('static', filename='bower_components/cryptojslib/rollups/aes.js') }}"></script>
 
 
-<script src="{{ url_for('static', filename='bower_components/forge/js/forge.js') }}"></script>
 <script src="{{ url_for('static', filename='bower_components/forge/js/util.js') }}"></script>
 <script src="{{ url_for('static', filename='bower_components/forge/js/sha256.js') }}"></script>
+<script src="{{ url_for('static', filename='bower_components/forge/js/sha1.js') }}"></script>
+<script src="{{ url_for('static', filename='bower_components/forge/js/md.js') }}"></script>
 <script src="{{ url_for('static', filename='bower_components/forge/js/cipher.js') }}"></script>
 <script src="{{ url_for('static', filename='bower_components/forge/js/cipherModes.js') }}"></script>
-<script src="{{ url_for('static', filename='bower_components/forge/js/aes.js') }}"></script>
 <script src="{{ url_for('static', filename='bower_components/forge/js/prng.js') }}"></script>
 <script src="{{ url_for('static', filename='bower_components/forge/js/random.js') }}"></script>
+<script src="{{ url_for('static', filename='bower_components/forge/js/aes.js') }}"></script>
 <script src="{{ url_for('static', filename='bower_components/forge/js/jsbn.js') }}"></script>
-<script src="{{ url_for('static', filename='bower_components/forge/js/asn1.js') }}"></script>
 <script src="{{ url_for('static', filename='bower_components/forge/js/pem.js') }}"></script>
-<script src="{{ url_for('static', filename='bower_components/forge/js/pki.js') }}"></script>
-<script src="{{ url_for('static', filename='bower_components/forge/js/rsa.js') }}"></script>
 <script src="{{ url_for('static', filename='bower_components/forge/js/oids.js') }}"></script>
+<script src="{{ url_for('static', filename='bower_components/forge/js/asn1.js') }}"></script>
+<script src="{{ url_for('static', filename='bower_components/forge/js/rsa.js') }}"></script>
 <script src="{{ url_for('static', filename='bower_components/forge/js/x509.js') }}"></script>
+<script src="{{ url_for('static', filename='bower_components/forge/js/pki.js') }}"></script>
 
 <script src="{{ url_for('static', filename='utils/u8array.js') }}"></script>
 
 <script src="http://cdn.peerjs.com/0.3/peer.min.js"></script>
 
 <div id="logged-in"> {{ logged_in() }} </div>
-
+<input id="master_csrf_token" type="hidden" value="{{ csrf_token() }}">
 <div class="ui vertical inverted sidebar menu left uncover">
 
   <div class="item">
@@ -58,13 +59,12 @@
 </div>
 
 <div id="idiot" style="position:absolute; left:200px; top:200px; z-index:100" class="hide">
-  <form>
+
     <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
     <textarea id="textarea">
 
     </textarea>
-    <input type="submit" value="submit" id="message-submit">
-  </form>
+    <input type="button" value="submit" id="message-submit">
 </div>
 
 <div class="page">

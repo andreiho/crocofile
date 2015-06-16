@@ -17,10 +17,12 @@ var passphrase;
 var downloadLink;
 var peer;
 var keyPair;
+var privateKey;
+var publicKey;
 var pki = forge.pki;
 var rsa = pki.rsa;
-var receiverPublicKey;
-var receiverUserId;
+var peerPublicKey;
+var peerUserId;
 var userId;
 
 // Bindings.
@@ -71,11 +73,39 @@ $('.sidebar').first()
   .sidebar('attach events', '.launch.button')
 ;
 
+
+// Messaging
+
+$("#message-submit").on('click', function(){
+    console.log("send:");
+
+    var conn = peer.connect(peerUserId);
+    var data = new Object();
+    conn.on('open', function(){
+      var msg = $("#textarea").val();
+      var md = forge.md.sha1.create();
+      md.update('sign this', 'utf-8');
+      console.log(md);
+      var signature = privateKey.sign(md);
+      data.signature = signature;
+      data.message = msg;
+      var dataJSON = JSON.stringify(data); 
+      conn.send(data);
+    });
+});
+
 /* ============================================================================
 ** File download.
 ** ==========================================================================*/
 
 $(document).ready(function() {
+  if (localStorage.privateKey) {
+    privateKey = pki.privateKeyFromPem(localStorage.privateKey);
+    publicKey = pki.publicKeyFromPem(localStorage.publicKey);
+  }
+  if (localStorage.peerPublicKey) {
+    peerPublicKey = pki.publicKeyFromPem(localStorage.peerPublicKey);
+  }
   lastRequest = "false";
   csrfToken = document.getElementsByName("_csrf_token")[0].value;
 
@@ -87,9 +117,42 @@ $(document).ready(function() {
   if (userId > -1) {
     peer = new Peer(userId, {key: 'tnyh1aenu1y8pvi'});
     peer.on('connection', function(conn) {
-      conn.on('data', function(data){
-        // Will print 'hi!'
-        console.log(data);
+      conn.on('data', function(dataJSON){
+        var data = JSON.parse(dataJSON);
+        peerUserId = conn.peer;
+        csrfToken = $("#master_csrf_token").val();
+        lastRequest = "false";
+        // AJAX call for public key
+        $.ajax({
+          url: '/getPublicKey',
+          type: 'POST',
+          xhr: function() { // custom xhr
+            var myXhr = $.ajaxSettings.xhr();
+            if(myXhr.upload) { // check if upload property exists
+              myXhr.upload.addEventListener('progress', progressHandler, false); // for handling the progress of the upload
+            }
+            return myXhr;
+          },
+          contentType: 'text/plain',
+          //Ajax events
+          //beforeSend: beforeSendHandler,
+          success: getPublicKeySuccessHandler,
+          error: errorHandler,
+          // Form data
+          headers: {
+            'X-File-Content-Type' : "application/octet-stream",
+            'X-Csrf-Token' : csrfToken,
+            'X-User-Id' : peerUserId,
+            'X-Last-Request': lastRequest
+          },
+          processData: false,
+          cache: false
+        });
+        var md = forge.md.sha1.create();
+        md.update(msg, 'utf8');
+        var verified = peerPublicKey.verify(md.digest().bytes(), data.signature);
+        console.log(verified);
+        console.log(data.message);
       });
     });
   }
@@ -441,20 +504,17 @@ function downloadChunkSuccessHandler(response) {
   downloadedChunks[responseObject.number] = responseObject.chunk;
 }
 function getPublicKeySuccessHandler(response) {
-  receiverPublicKey = response;
-  if (receiverPublicKey == "offline") {
+  peerPublicKey = pki.publicKeyFromPem(response);
+  localStorage.peerPublicKey = response;
+
+  if (peerPublicKey == "offline") {
     alert("The user seems offline");
   }
-  else if (receiverPublicKey == "failed"){
+  else if (peerPublicKey == "failed"){
     alert("An error occured");
   }
   else {
     $("#idiot").show();
-    conn = peer.connect(receiverUserId);
-    conn.on('open', function(){
-        conn.send('hi!');
-        console.log("sent")
-    });
   }
 }
 /* ============================================================================
@@ -462,15 +522,16 @@ function getPublicKeySuccessHandler(response) {
 ** ==========================================================================*/
 
 function setPublicKey() {
-  keyPair = generateKeyPair();
+  generateKeyPair();
+  localStorage.publicKey = pki.publicKeyToPem(keyPair.publicKey);
+  localStorage.privateKey = pki.privateKeyToPem(keyPair.privateKey);
   $('#public-key').val(pki.publicKeyToPem(keyPair.publicKey)); 
 }
 
 function getPublicKey() {
-  receiverUserId = $(this).children(".user-id").data("userId");
+  peerUserId = $(this).children(".user-id").data("userId");
   csrfToken = $(this).children("._csrf_token").val();
-  console.log(csrfToken);
-  lastRequest = "true";
+  lastRequest = "false";
   // AJAX call for public key
   $.ajax({
     url: '/getPublicKey',
@@ -491,16 +552,13 @@ function getPublicKey() {
     headers: {
       'X-File-Content-Type' : "application/octet-stream",
       'X-Csrf-Token' : csrfToken,
-      'X-User-Id' : receiverUserId,
+      'X-User-Id' : peerUserId,
       'X-Last-Request': lastRequest
     },
     processData: false,
     cache: false
   });
 }
-
-
-
 
 /* ============================================================================
 ** Utilities.
@@ -610,5 +668,5 @@ function convertWordArrayToUint8Array(wordArray) {
 
 // generate an RSA key parseInt
 function generateKeyPair() {
-  return rsa.generateKeyPair({bits: 2048, e: 0x10001});
+  keyPair = rsa.generateKeyPair({bits: 2048, e: 0x10001});
 }
