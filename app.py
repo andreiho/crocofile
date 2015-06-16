@@ -111,6 +111,7 @@ def generate_csrf_token():
 # Register a global function in the Jinja environment of csrf_token() for use in forms
 app.jinja_env.globals['csrf_token'] = generate_csrf_token
 app.jinja_env.globals['datetime'] = datetime
+app.jinja_env.globals['logged_in'] = -1
 
 @app.context_processor
 def inject_users():
@@ -211,13 +212,34 @@ def downloadHandler():
 
     return "failed"
 
+
+@app.route('/getPublicKey', methods=['GET', 'POST'])
+def getPublicKey():
+
+    if request.method == 'POST':
+        user_id = request.headers['X-User-Id']
+        print(user_id)
+        try:
+            cursor.execute('SELECT public_key FROM users WHERE id = (%s);', (user_id,))
+            result = cursor.fetchone()
+            print (result[0])
+            if result[0] == None:
+                return "offline"
+            else:
+                return result
+        except:
+            return "failed"
+
+    return "failed"
+
+
 @app.route('/logout')
 def logout():
     username = session['username']
     users_online_dict.pop(username, None)
 
     session.pop('logged_in', None)
-
+    app.jinja_env.globals['logged_in'] = -1
     flash('You were logged out.')
     return redirect('/')
 
@@ -260,6 +282,7 @@ def login():
             return render_template('login.html', error=error)
 
         session['logged_in'] = True
+        app.jinja_env.globals['logged_in'] = user._id
         session['user_id'] = user._id
 
         users_online_dict[username] = username
@@ -335,6 +358,9 @@ def registration():
 @app.route('/vault')
 def vault():
     return render_template("vault.html", files_dict=files_dict, files_usernames_dict=files_usernames_dict)
+
+
+# MESSAGING ROUTES
 
 # ROUTES END
 

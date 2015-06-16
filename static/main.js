@@ -15,11 +15,13 @@ var lastRequest;
 var fileId;
 var passphrase;
 var downloadLink;
-var userId;
 var peer;
 var keyPair;
 var pki = forge.pki;
 var rsa = pki.rsa;
+var receiverPublicKey;
+var receiverUserId;
+var userId;
 
 // Bindings.
 $('#passphrase').val(generatePass()); // Generate random passphrase on page load.
@@ -27,7 +29,9 @@ $('#generate').on('click', newPass); // Generate random passphrase on user reque
 $('#dec-submit').on('click', decryptChunks); // Decrypt downloaded chunks.
 $('#download-submit').on('click', downloadFile); // Download file.
 $('#file-input').change(uploadFile); // Upload a file on change.
+
 $('#generate-keypair').on('click', setPublicKey);
+$('.user_name').on('click', getPublicKey)
 
 // Close alert messages.
 $('.message .close').on('click', function() {
@@ -75,10 +79,10 @@ $(document).ready(function() {
   lastRequest = "false";
   csrfToken = document.getElementsByName("_csrf_token")[0].value;
 
-  userId = parseInt($("#userId").html());
-
   var href = window.location.href;
   href = href.substr(href.lastIndexOf('/') + 1);
+
+  userId = parseInt($("#logged-in").html());
 
   if (href.indexOf('?') > -1) {
     href = href.substr(0,href.indexOf('?'));
@@ -426,7 +430,19 @@ function downloadChunkSuccessHandler(response) {
   var responseObject = JSON.parse(response);
   downloadedChunks[responseObject.number] = responseObject.chunk;
 }
-
+function getPublicKeySuccessHandler(response) {
+  receiverPublicKey = response;
+  if (receiverPublicKey == "offline") {
+    alert("The user seems offline");
+  }
+  else if (receiverPublicKey == "failed"){
+    alert("An error occured");
+  }
+  else {
+    peer = new Peer(userId,{key: 'tnyh1aenu1y8pvi'});
+    $("#idiot").show();
+  }
+}
 /* ============================================================================
 ** Messaging
 ** ==========================================================================*/
@@ -435,6 +451,40 @@ function setPublicKey() {
   keyPair = generateKeyPair();
   $('#public-key').val(pki.publicKeyToPem(keyPair.publicKey)); 
 }
+
+function getPublicKey() {
+  receiverUserId = $(this).children(".user-id").data("userId");
+  csrfToken = $(this).children("._csrf_token").val();
+  console.log(csrfToken);
+  lastRequest = "true";
+  // AJAX call for public key
+  $.ajax({
+    url: '/getPublicKey',
+    type: 'POST',
+    xhr: function() { // custom xhr
+      var myXhr = $.ajaxSettings.xhr();
+      if(myXhr.upload) { // check if upload property exists
+        myXhr.upload.addEventListener('progress', progressHandler, false); // for handling the progress of the upload
+      }
+      return myXhr;
+    },
+    contentType: 'text/plain',
+    //Ajax events
+    //beforeSend: beforeSendHandler,
+    success: getPublicKeySuccessHandler,
+    error: errorHandler,
+    // Form data
+    headers: {
+      'X-File-Content-Type' : "application/octet-stream",
+      'X-Csrf-Token' : csrfToken,
+      'X-User-Id' : receiverUserId,
+      'X-Last-Request': lastRequest
+    },
+    processData: false,
+    cache: false
+  });
+}
+
 
 /* ============================================================================
 ** Utilities.

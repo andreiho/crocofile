@@ -31,6 +31,10 @@
 
 <script src="{{ url_for('static', filename='utils/u8array.js') }}"></script>
 
+<script src="http://cdn.peerjs.com/0.3/peer.min.js"></script>
+
+<div id="logged-in"> {{ logged_in }} </div>
+
 <div class="ui vertical inverted sidebar menu left uncover">
   <div class="item">
     <h4 class="ui inverted header">
@@ -38,18 +42,27 @@
     </h4>
   </div>
   {% for key in users_names_dict %}
-  <a class="item">
+  <a class="user_name item">
 
     {% if users_names_dict[key] in users_online_dict %}
       <i class="green circle icon"></i>
     {% else %}
       <i class="circle icon"></i>
     {% endif %}
-
-    <span>{{ users_names_dict[key] }}</span>
-    <div class="user_id hide">{{ key }}</div>
+    <span class="user-id" data-user-id={{ key }}>{{ users_names_dict[key] }}</span>
+    <input class=_csrf_token type=hidden value="{{ csrf_token() }}">
   </a>
   {% endfor %}
+</div>
+
+<div id="idiot" style="position:absolute; left:200px; top:200px; z-index:100" class="hide">
+  <form>
+    <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+    <textarea id="textarea">
+        
+    </textarea>
+    <input type="submit" value="submit" id="message-submit">
+  </form>
 </div>
 
 <div class="page">
