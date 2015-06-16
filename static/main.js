@@ -85,12 +85,13 @@ $(document).ready(function() {
   userId = parseInt($("#logged-in").html());
 
   if (userId > -1) {
-    peer = new Peer(userId,{key: 'tnyh1aenu1y8pvi'});
-    var conn = peer.connect(receiverUserId);
-    conn.on('open', function(){
-      conn.send('hi!');
+    peer = new Peer(userId, {key: 'tnyh1aenu1y8pvi'});
+    peer.on('connection', function(conn) {
+      conn.on('data', function(data){
+        // Will print 'hi!'
+        console.log(data);
+      });
     });
-
   }
 
   if (href.indexOf('?') > -1) {
@@ -452,6 +453,7 @@ function getPublicKeySuccessHandler(response) {
     conn = peer.connect(receiverUserId);
     conn.on('open', function(){
         conn.send('hi!');
+        console.log("sent")
     });
   }
 }
