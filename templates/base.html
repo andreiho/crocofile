@@ -36,21 +36,23 @@
 <div id="logged-in"> {{ logged_in }} </div>
 
 <div class="ui vertical inverted sidebar menu left uncover">
-  <div class="item">
-    <h4 class="ui inverted header">
-      Users
-    </h4>
-  </div>
-  {% for key in users_names_dict %}
-  <a class="user_name item">
 
-    {% if users_names_dict[key] in users_online_dict %}
-      <i class="green circle icon"></i>
-    {% else %}
-      <i class="circle icon"></i>
-    {% endif %}
-    <span class="user-id" data-user-id={{ key }}>{{ users_names_dict[key] }}</span>
-    <input class=_csrf_token type=hidden value="{{ csrf_token() }}">
+  <div class="item">
+    <h5 class="ui tiny inverted header">USERS</h5>
+  </div>
+
+  {% for key in users_online_dict %}
+  <a class="user_name item">
+    <i class="green circle icon"></i>
+    <span class="user-id" data-user-id="{{ key }}">{{ users_online_dict[key] }}</span>
+    <input class="_csrf_token" type="hidden" value="{{ csrf_token() }}">
+  </a>
+  {% endfor %}
+
+  {% for key in users_offline_dict %}
+  <a class="item">
+    <i class="circle icon"></i>
+    <span>{{ users_offline_dict[key] }}</span>
   </a>
   {% endfor %}
 </div>
@@ -59,7 +61,7 @@
   <form>
     <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
     <textarea id="textarea">
-        
+
     </textarea>
     <input type="submit" value="submit" id="message-submit">
   </form>

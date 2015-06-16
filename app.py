@@ -24,7 +24,7 @@ print ("Connected!\n")
 # users get loaded before the app gets started (on user table changes)
 users_dict = {}
 # usernames get loaded before the app gets started (on user table changes)
-users_names_dict = {}
+users_offline_dict = {}
 # online users get loaded before the app gets started (on user table changes)
 users_online_dict = {}
 
@@ -115,7 +115,7 @@ app.jinja_env.globals['logged_in'] = -1
 
 @app.context_processor
 def inject_users():
-    return dict(users_names_dict=users_names_dict, users_online_dict=users_online_dict)
+    return dict(users_offline_dict=users_offline_dict, users_online_dict=users_online_dict)
 
 # ROUTES
 
@@ -236,10 +236,16 @@ def getPublicKey():
 @app.route('/logout')
 def logout():
     username = session['username']
-    users_online_dict.pop(username, None)
+    userid = session['user_id']
+
+    # Add user to online dictionary
+    users_online_dict.pop(userid, None)
+    # Remove user from offline dictionary
+    users_offline_dict[userid] = username
 
     session.pop('logged_in', None)
     app.jinja_env.globals['logged_in'] = -1
+
     flash('You were logged out.')
     return redirect('/')
 
@@ -283,22 +289,28 @@ def login():
 
         session['logged_in'] = True
         app.jinja_env.globals['logged_in'] = user._id
-        session['user_id'] = user._id
 
-        users_online_dict[username] = username
+        session['user_id'] = user._id
+        session['username'] = username
+
+        # Add user to online dictionary
+        users_online_dict[user._id] = username
+        # Remove user from offline dictionary
+        users_offline_dict.pop(user._id, None)
+
         try:
 
             cursor.execute('UPDATE users SET public_key = (%s) WHERE id = (%s);', (public_key, user._id,))
             conn.commit()
 
         except:
-            conn.rollback()    
+            conn.rollback()
         flash('You were logged in.')
         return redirect(url_for('index'))
 
     return render_template('login.html', error=error)
 
-@app.route('/registration', methods=['GET', 'POST']) 
+@app.route('/registration', methods=['GET', 'POST'])
 def registration():
     error = None
 
@@ -415,7 +427,7 @@ def load_all_users():
 
     for row in cursor.fetchall():
         users_dict[row[1]] = UserContext(row[0], row[1], row[2])
-        users_names_dict[row[0]] = row[1]
+        users_offline_dict[row[0]] = row[1]
 
 def load_all_files():
     global files_dict
