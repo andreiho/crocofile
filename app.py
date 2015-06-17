@@ -30,7 +30,7 @@ users_online_dict = {}
 
 # files get loaded before the app gets started (on file table changes)
 files_dict = {}
-# files usernames get loaded before the app gets started (on file table changes)
+# files usernames (tags) get loaded before the app gets started (on file table change)
 files_usernames_dict = {}
 
 # mapping an IP (string) -> username attempts (integer)
@@ -39,7 +39,7 @@ wrong_username_dict = {}
 wrong_username_timeout = {}
 
 
-# CLASSES
+# USER CONTEXT CLASS
 
 class UserContext():
     def __init__(self, id, username, password):
@@ -56,6 +56,7 @@ class UserContext():
 
         # blocked Timeout is a mapping an IP (string) -> timestamp of timeout over
         self._blocked_timeout = {}
+    
     def is_blocked(self, ip):
         assert type(ip) == str
 
@@ -86,6 +87,41 @@ class UserContext():
 
         return result
 
+# Login attempts with wrong username
+
+def add_to_wrong_username(ip):
+    global wrong_username_dict
+    global wrong_username_timeout
+    counter = wrong_username_dict.get(ip, 0)
+    counter += 1
+    wrong_username_dict[ip] = counter
+
+    if counter == 3:
+        wrong_username_timeout[ip] = time.time() + 60
+
+def is_blocked_for_username(ip):
+    global wrong_username_dict
+    global wrong_username_timeout
+
+    counter = wrong_username_dict.get(ip, 0)
+    timeout = wrong_username_timeout.get(ip, 0)
+
+    if counter == 3 and timeout > time.time():
+        return True
+    elif counter ==3 and timeout < time.time():
+        wrong_username_dict[ip] = 0
+        wrong_username_timeout[ip] = 0
+        return False
+    else:
+        return False
+
+# Username utility
+
+def fetch_user_by_username(username):
+    return users_dict.get(username, None)
+
+# JINJA (send values to the templates)
+
 # CSRF safeguard
 
 @app.before_request
@@ -109,16 +145,22 @@ def generate_csrf_token():
         session['_csrf_token'] = binascii.hexlify(token).decode('utf-8')
     return session['_csrf_token']
 
+
+# Register a global function in the Jinja environment of csrf_token() for use in forms
+app.jinja_env.globals['csrf_token'] = generate_csrf_token
+# Date time module for string manipulation in template
+app.jinja_env.globals['datetime'] = datetime
+
 def get_logged_in_user():
     if 'user_id' in session:
         return session['user_id']
     else:
         return -1
-# Register a global function in the Jinja environment of csrf_token() for use in forms
-app.jinja_env.globals['csrf_token'] = generate_csrf_token
-app.jinja_env.globals['datetime'] = datetime
+
+# Return the logged in user to template
 app.jinja_env.globals['logged_in'] = get_logged_in_user
 
+# Inject users dict into Jinja environment
 @app.context_processor
 def inject_users():
     return dict(users_offline_dict=users_offline_dict, users_online_dict=users_online_dict)
@@ -186,6 +228,8 @@ def upload():
 @app.route('/download', methods=['GET', 'POST'])
 def download():
     return render_template("download.html")
+
+# Handle download XHR
 
 @app.route('/downloadHandler', methods=['GET', 'POST'])
 def downloadHandler():
@@ -301,13 +345,12 @@ def login():
         # Remove user from offline dictionary
         users_offline_dict.pop(user._id, None)
 
-        try:
-
+        try:     
             cursor.execute('UPDATE users SET public_key = (%s) WHERE id = (%s);', (public_key, user._id,))
             conn.commit()
-
         except:
             conn.rollback()
+        
         flash('You were logged in.')
         return redirect(url_for('index'))
 
@@ -358,12 +401,14 @@ def registration():
             return render_template('registration.html', lenError=lenError, lenErrorMsg=lenErrorMsg)
 
         password = binascii.hexlify(hash_password(password)).decode('utf-8')
+        
         try:
             cursor.execute('INSERT INTO users (username, password) VALUES (%s, %s)', (username, password))
         except:
             conn.rollback()
             return render_template('registration.html', someError="Something went wrong. Try again or tell us, if you are sweet?")
         conn.commit()
+        
         load_all_users()
         flash('You have been registered.')
         return redirect(url_for('login'))
@@ -375,39 +420,10 @@ def vault():
     return render_template("vault.html", files_dict=files_dict, files_usernames_dict=files_usernames_dict)
 
 
-# MESSAGING ROUTES
-
 # ROUTES END
 
-def add_to_wrong_username(ip):
-    global wrong_username_dict
-    global wrong_username_timeout
-    counter = wrong_username_dict.get(ip, 0)
-    counter += 1
-    wrong_username_dict[ip] = counter
 
-    if counter == 3:
-        wrong_username_timeout[ip] = time.time() + 60
-
-def is_blocked_for_username(ip):
-    global wrong_username_dict
-    global wrong_username_timeout
-
-    counter = wrong_username_dict.get(ip, 0)
-    timeout = wrong_username_timeout.get(ip, 0)
-
-    if counter == 3 and timeout > time.time():
-        return True
-    elif counter ==3 and timeout < time.time():
-        wrong_username_dict[ip] = 0
-        wrong_username_timeout[ip] = 0
-        return False
-    else:
-        return False
-
-def fetch_user_by_username(username):
-    return users_dict.get(username, None)
-
+# UTILITIES
 def randstr(length):
     return ''.join(chr(random.randint(0,255)) for i in range(length))
 

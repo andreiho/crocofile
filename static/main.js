@@ -86,17 +86,19 @@ $("#message-submit").on('click', function(){
       md.update(msg, 'utf-8');
       var signature = privateKey.sign(md);
       data.signature = signature;
-      data.message = msg;
+      data.message = peerPublicKey.encrypt(msg);
       var dataJSON = JSON.stringify(data); 
       conn.send(dataJSON);
     });
 });
 
 /* ============================================================================
-** File download.
+** On page refresh
 ** ==========================================================================*/
 
 $(document).ready(function() {
+
+  // Load keys into memory
   if (localStorage.privateKey) {
     privateKey = pki.privateKeyFromPem(localStorage.privateKey);
     publicKey = pki.publicKeyFromPem(localStorage.publicKey);
@@ -104,21 +106,34 @@ $(document).ready(function() {
   if (localStorage.peerPublicKey) {
     peerPublicKey = pki.publicKeyFromPem(localStorage.peerPublicKey);
   }
+
+  // wot? move that stuff where it belongs?
   lastRequest = "false";
+
+  // token per route
   csrfToken = document.getElementsByName("_csrf_token")[0].value;
 
   var href = window.location.href;
   href = href.substr(href.lastIndexOf('/') + 1);
 
+  // load logged in user from template
   userId = parseInt($("#logged-in").html());
 
   if (userId > -1) {
+    // register with peerJS
     peer = new Peer(userId, {key: 'tnyh1aenu1y8pvi'});
+    // if connection incoming
     peer.on('connection', function(conn) {
       conn.on('data', function(dataJSON){
-        var data = JSON.parse(dataJSON);
+        
+        var data = JSON.parse(dataJSON); 
+        //decrypt with receiver's private key
+        var message = privateKey.decrypt(data.message);
+        // extract sender's id
         peerUserId = conn.peer;
+        // get master csrf for the xhr (no form)
         csrfToken = $("#master_csrf_token").val();
+        // keep token valid without page refresh
         lastRequest = "false";
         // AJAX call for public key
         $.ajax({
@@ -146,11 +161,14 @@ $(document).ready(function() {
           processData: false,
           cache: false
         });
+        // hash digest message
         var md = forge.md.sha1.create();
-        md.update(data.message, 'utf8');
+        md.update(message, 'utf8');
+        // verify signature with public key retrieved from server
         var verified = peerPublicKey.verify(md.digest().bytes(), data.signature);
+
         console.log("Identity verified:" + verified);
-        console.log("Message:"  + data.message);
+        console.log("Decrypted Message:"  + message);
       });
     });
   }
@@ -158,8 +176,9 @@ $(document).ready(function() {
   if (href.indexOf('?') > -1) {
     href = href.substr(0,href.indexOf('?'));
   }
-
+  // if route = download
   if(href == "download") {
+    // request file specified in url parameter
     $.ajax({
      url: '/downloadHandler',
       type: 'POST',
@@ -186,6 +205,7 @@ $(document).ready(function() {
       cache: false
     });
   }
+  // if route = login create key pair
   else if(href == "login") {
     setPublicKey();
   }
@@ -196,43 +216,47 @@ $(document).ready(function() {
 ** File encryption.
 ** ==========================================================================*/
 
-// Encrypt slices of a file.
-function encryptFile(slices, passphrase) {
+// Encrypt and upload slices of a file.
+function encryptAndUploadChunks(slices, passphrase) {
 
   var encryptedSlices = [];
   var aesEncryptor = CryptoJS.algo.AES.createEncryptor(passphrase, { iv: iv });
 
+  // initialize empty array of FileReaders
   var readerArray = [];
 
+  // create a file reader for each chunk to encrypt
   for (var j = 0; j < slices.length; j++) {
-    readerArray.push(new FileReader()); // Initialize the file reader.
+    readerArray.push(new FileReader());
   }
 
+  // for each file reader
   $.each(readerArray, function(index, value) {
-
+    // when the file reader loaded a chunk into array buffer
     value.onload = function(e) {
-
+      // convert to uint 8 array
       var ui8a = new Uint8Array(value.result);
+      // convert to wordarray
       var wordarray = CryptoJS.enc.u8array.parse(ui8a);
-
+      // encrypt, convert to Base64 string and push to encrypted slices array
       encryptedSlices.push(aesEncryptor.process(wordarray).toString(CryptoJS.enc.Base64));
 
     };
-
+    // read the slice at the posttion of index into array buffer
     value.readAsArrayBuffer(slices[index]);
 
+    // when the last filereader is done
     readerArray[readerArray.length - 1].onloadend = function(e) {
-
+      // if the encrypted slices array is the same length as the unencrypted
       if (encryptedSlices.length == slices.length) {
-
+        // add the finalizer
         encryptedSlices.push(aesEncryptor.finalize().toString(CryptoJS.enc.Base64));
-
+        // for each encrypted slice, upload via xhr
         $.each(encryptedSlices, function(index, value) {
-
+          // on last slice send lastRequest to pop csrf token
           if (index == encryptedSlices.length -1) {
             lastRequest = "true";
           }
-
           $.ajax({
 
             url: '/upload',
@@ -255,9 +279,9 @@ function encryptFile(slices, passphrase) {
               'X-Last-Request' : lastRequest,
               'X-Chunk-Number' : index,
               'X-Upload-Token' : uploadToken,
-              'X-Total-Chunks' : encryptedSlices.length
+              'X-Total-Chunks' : encryptedSlices.length // inform backend how much slices to expect
             },
-            data: value, // binary chunk
+            data: value, // encrypted chunk, base64
             processData: false,
             cache: false
           });
@@ -346,8 +370,8 @@ function doUpload() {
   // Get the passphrase chosen by the user.
   passphrase = $('#passphrase').val();
 
-  // Finally encrypt the slices using the passphrase and the iv.
-  encryptFile(slices, passphrase);
+  // Encrypt and upload the slices using the passphrase and the iv.
+  encryptAndUploadChunks(slices, passphrase);
 }
 
 // File download handler.
@@ -516,7 +540,7 @@ function getPublicKeySuccessHandler(response) {
   }
 }
 /* ============================================================================
-** Messaging
+** Get and set public keys
 ** ==========================================================================*/
 
 function setPublicKey() {
@@ -664,7 +688,7 @@ function convertWordArrayToUint8Array(wordArray) {
   return u8_array;
 }
 
-// generate an RSA key parseInt
+// generate an RSA key pair
 function generateKeyPair() {
   keyPair = rsa.generateKeyPair({bits: 2048, e: 0x10001});
 }
