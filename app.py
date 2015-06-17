@@ -288,7 +288,7 @@ def logout():
     userid = session['user_id']
 
     # Remove public key from database
-    try:     
+    try:
         cursor.execute('UPDATE users SET public_key = NULL WHERE id = (%s);', (userid,))
         conn.commit()
     except:
