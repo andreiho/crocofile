@@ -68,6 +68,7 @@
           <a href="vault" class="item">Vault</a>
             {% if not session.logged_in %}
               <a href="{{ url_for('login') }}" class="item">Login</a>
+              <a href="{{ url_for('registration') }}" class="item">Register</a>
             {% else %}
               <a href="{{ url_for('logout') }}" class="item">Logout</a>
             {% endif %}
