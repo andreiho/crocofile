@@ -31,8 +31,6 @@ $('#generate').on('click', newPass); // Generate random passphrase on user reque
 $('#dec-submit').on('click', decryptChunks); // Decrypt downloaded chunks.
 $('#download-submit').on('click', downloadFile); // Download file.
 $('#file-input').change(uploadFile); // Upload a file on change.
-
-$('#generate-keypair').on('click', setPublicKey);
 $('.user_name').on('click', getPublicKey);
 
 // Close alert messages.
@@ -42,7 +40,7 @@ $('.message .close').on('click', function() {
 
 // Close alerts after some seconds.
 setTimeout(function () {
-  $('.message').fadeOut();
+  $('.message .autoclose').fadeOut();
 }, 5000);
 
 // Select input value.
@@ -73,13 +71,11 @@ $('.sidebar').first()
   .sidebar('attach events', '.launch.button')
 ;
 
-
 // Messaging
-
 $("#message-submit").on('click', function(){
 
     var conn = peer.connect(peerUserId);
-    var data = new Object();
+    var data = {};
 
     conn.on('open', function(){
 
@@ -93,15 +89,19 @@ $("#message-submit").on('click', function(){
 
       var signature = privateKey.sign(md);
       var signedTimestamp = privateKey.sign(mdT);
-      
+
       data.signature = signature;
       data.signedTimestamp = signedTimestamp;
       data.message = peerPublicKey.encrypt(msg);
       data.timestamp = peerPublicKey.encrypt(timestamp);
 
-      var dataJSON = JSON.stringify(data); 
+      var dataJSON = JSON.stringify(data);
 
       conn.send(dataJSON);
+
+      $("#textarea").val("");
+      $("#message-submit").removeClass("pink").addClass("green");
+      $("#message-submit i").removeClass("send").addClass("check");
     });
 
 });
@@ -117,7 +117,6 @@ $(document).ready(function() {
     privateKey = pki.privateKeyFromPem(localStorage.privateKey);
     publicKey = pki.publicKeyFromPem(localStorage.publicKey);
   }
-
 
   if (localStorage.peerPublicKey) {
     peerPublicKey = pki.publicKeyFromPem(localStorage.peerPublicKey);
@@ -142,14 +141,15 @@ $(document).ready(function() {
     // if connection incoming
     peer.on('connection', function(conn) {
       conn.on('data', function(dataJSON){
-        
-        var data = JSON.parse(dataJSON); 
+        var data = JSON.parse(dataJSON);
         //decrypt message with receiver's private key
         var message = privateKey.decrypt(data.message);
         //decrypt timestamp with receiver's private key
         var timestamp = privateKey.decrypt(data.timestamp);
         // extract sender's id
         peerUserId = conn.peer;
+        // extract sender's name
+        var sender = $(".user-id[data-user-id=" + peerUserId + "]").text();
         // get master csrf for the xhr (no form)
         csrfToken = $("#master_csrf_token").val();
         // keep token valid without page refresh
@@ -186,15 +186,18 @@ $(document).ready(function() {
         md.update(message, 'utf8');
         var mdT = forge.md.sha1.create();
         mdT.update(timestamp, 'utf8');
-        
+
         // verify signatures with public key retrieved from server
         var verified = peerPublicKey.verify(md.digest().bytes(), data.signature);
         var verifiedTimestamp = peerPublicKey.verify(mdT.digest().bytes(), data.signedTimestamp);
 
-        console.log("Identity Message verified:" + verified);
-        console.log("Timestamp verified:" + verifiedTimestamp);
-        console.log("Decrypted Message:"  + message);
-        console.log("Decrypted Timestamp:"  + timestamp);
+        // Display message to receiver
+        $("#chat-username").html(sender);
+        $("#chat-field").removeClass("hide");
+        $("#message").text(message);
+        $("#textarea").val("").attr("placeholder", "Reply...");
+        $("#message-submit").removeClass("green").addClass("pink");
+        $("#message-submit i").removeClass("check").addClass("send");
       });
     });
   }
@@ -236,7 +239,6 @@ $(document).ready(function() {
     setPublicKey();
   }
 });
-
 
 
 /* ============================================================================
@@ -383,7 +385,7 @@ function encryptAndUploadChunks() {
 
         });
       }
-    }
+    };
   });
 }
 
@@ -542,6 +544,7 @@ function downloadChunkSuccessHandler(response) {
   var responseObject = JSON.parse(response);
   downloadedChunks[responseObject.number] = responseObject.chunk;
 }
+
 function getPublicKeySuccessHandler(response) {
   peerPublicKey = pki.publicKeyFromPem(response);
   localStorage.peerPublicKey = response;
@@ -553,9 +556,11 @@ function getPublicKeySuccessHandler(response) {
     alert("An error occured");
   }
   else {
-    $("#idiot").show();
+    $("#chat-modal").modal('show');
   }
+
 }
+
 /* ============================================================================
 ** Get and set public keys
 ** ==========================================================================*/
@@ -573,8 +578,13 @@ function setPublicKey() {
 
 function getPublicKey() {
   peerUserId = $(this).children(".user-id").data("userId");
+  peerUserName = $(this).children(".user-id").data("userName");
+
+  $("#chat-username").text(peerUserName);
+
   csrfToken = $(this).children("._csrf_token").val();
   lastRequest = "false";
+
   // AJAX call for public key
   $.ajax({
     url: '/getPublicKey',

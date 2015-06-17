@@ -56,7 +56,7 @@ class UserContext():
 
         # blocked Timeout is a mapping an IP (string) -> timestamp of timeout over
         self._blocked_timeout = {}
-    
+
     def is_blocked(self, ip):
         assert type(ip) == str
 
@@ -352,12 +352,12 @@ def login():
         # Remove user from offline dictionary
         users_offline_dict.pop(user._id, None)
 
-        try:     
+        try:
             cursor.execute('UPDATE users SET public_key = (%s) WHERE id = (%s);', (public_key, user._id,))
             conn.commit()
         except:
             conn.rollback()
-        
+
         flash('You were logged in.')
         return redirect(url_for('index'))
 
@@ -408,14 +408,14 @@ def registration():
             return render_template('registration.html', lenError=lenError, lenErrorMsg=lenErrorMsg)
 
         password = binascii.hexlify(hash_password(password)).decode('utf-8')
-        
+
         try:
             cursor.execute('INSERT INTO users (username, password) VALUES (%s, %s)', (username, password))
         except:
             conn.rollback()
             return render_template('registration.html', someError="Something went wrong. Try again or tell us, if you are sweet?")
         conn.commit()
-        
+
         load_all_users()
         flash('You have been registered.')
         return redirect(url_for('login'))
