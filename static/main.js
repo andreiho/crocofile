@@ -33,7 +33,7 @@ $('#download-submit').on('click', downloadFile); // Download file.
 $('#file-input').change(uploadFile); // Upload a file on change.
 
 $('#generate-keypair').on('click', setPublicKey);
-$('.user_name').on('click', getPublicKey)
+$('.user_name').on('click', getPublicKey);
 
 // Close alert messages.
 $('.message .close').on('click', function() {
@@ -86,8 +86,10 @@ $("#message-submit").on('click', function(){
       md.update(msg, 'utf-8');
       var signature = privateKey.sign(md);
       data.signature = signature;
+
       data.message = peerPublicKey.encrypt(msg);
       var dataJSON = JSON.stringify(data); 
+
       conn.send(dataJSON);
     });
 });
@@ -545,9 +547,13 @@ function getPublicKeySuccessHandler(response) {
 
 function setPublicKey() {
   generateKeyPair();
+
   localStorage.publicKey = pki.publicKeyToPem(keyPair.publicKey);
   localStorage.privateKey = pki.privateKeyToPem(keyPair.privateKey);
-  $('#public-key').val(pki.publicKeyToPem(keyPair.publicKey)); 
+
+  $('#public-key').val(pki.publicKeyToPem(keyPair.publicKey));
+
+  $(".ui.active.dimmer").removeClass('active');
 }
 
 function getPublicKey() {

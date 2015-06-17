@@ -7,7 +7,7 @@
     <div class="column">
       <h4 class="ui dividing header">Login to your account</h4>
 
-      <form class="ui form" action="{{ url_for('login') }}" method="post">
+      <form id="login-form" class="ui form" action="{{ url_for('login') }}" method="post">
 	      <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
 
         <div class="field {{ fieldError }}">
@@ -23,12 +23,10 @@
             <i class="lock icon"></i>
           </div>
         </div>
-        
-        <div class="field">
-          <div class="ui left icon action input">
-            <i class="key icon"></i>
-            <input type="text" name="public-key" id="public-key">
-            <div id="generate-keypair" class="ui default submit button">Generate Keypair</div>
+
+        <div class="field hide">
+          <div class="ui input">
+            <input type="hidden" name="public-key" id="public-key">
           </div>
         </div>
 
@@ -51,8 +49,25 @@
         <div>{{ error }}</div>
       </div>
       {% endif %}
+
+      <h4 class="ui small disabled header" style="margin-top: 1em;">
+        Tip: Refresh the page to generate a new RSA keypair.
+      </h4>
     </div>
   </div>
+
+  <div class="ui active inverted dimmer" id="login-dim">
+    <div class="ui text loader">
+      <h4 class="ui small header" style="margin-top: 1em;">
+        You will be able to login in just a second.
+      </h4>
+      <p class="sub header">
+        Security is of utmost importance to us. This is why, before you can login, we need to generate
+         a unique RSA keypair which will be used to verify your identity later.
+      </p>
+    </div>
+  </div>
+
 </div>
 
 {% endblock %}
