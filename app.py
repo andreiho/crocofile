@@ -175,9 +175,9 @@ def index():
 def upload():
     if request.method == 'POST':
 
-        binary_file = request.data
+        chunk = request.data
 
-        if binary_file:
+        if chunk:
 
             chunknumber = secure_filename(request.headers['X-Chunk-Number'])
             total_chunks = request.headers['X-Total-Chunks']
@@ -191,7 +191,7 @@ def upload():
             if not os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], filename)):
                 os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             with open(os.path.join(app.config['UPLOAD_FOLDER'], filename, chunknumber), 'wb') as f:
-                f.write(binary_file)
+                f.write(chunk)
 
             if int(chunknumber) == int(total_chunks) - 1:
                 session.pop(upload_token, None)
@@ -286,6 +286,13 @@ def getPublicKey():
 def logout():
     username = session['username']
     userid = session['user_id']
+
+    # Remove public key from database
+    try:     
+        cursor.execute('UPDATE users SET public_key = NULL WHERE id = (%s);', (userid,))
+        conn.commit()
+    except:
+        conn.rollback()
 
     # Add user to online dictionary
     users_online_dict.pop(userid, None)
