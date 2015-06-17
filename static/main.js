@@ -103,6 +103,7 @@ $("#message-submit").on('click', function(){
 
       conn.send(dataJSON);
     });
+
 });
 
 /* ============================================================================
@@ -136,7 +137,7 @@ $(document).ready(function() {
 
   if (userId > -1) {
     // register with peerJS
-    peer = new Peer(userId, {key: 'tnyh1aenu1y8pvi'});
+    peer = new Peer(userId, {host: '188.166.94.47', port: 9000, secure: true});
 
     // if connection incoming
     peer.on('connection', function(conn) {
