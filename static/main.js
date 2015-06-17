@@ -214,12 +214,81 @@ $(document).ready(function() {
 });
 
 
+
 /* ============================================================================
-** File encryption.
+** File encryption and upload
 ** ==========================================================================*/
 
+// alert server create database entry and upload session
+function uploadFile() {
+
+  // Get the chosen file to retrieve filename
+  var file =  $("#file-input")[0].files[0];
+
+  // Get the name of the file given by the user...
+  filename = $('#filename').val();
+
+  // ...or just take the existing name.
+  if (filename.length < 1){
+    filename = file.name;
+  }
+
+  if(!file) {
+    return window.alert("Please choose a file.");
+  }
+
+  var username = $('#username').val();
+
+  // set upload token
+  uploadToken = uploadToken();
+
+  // create the initialization vector.
+  iv = createIV();
+
+  // establish upload session
+  $.ajax({
+
+    url: '/upload',
+    type: 'POST',
+    xhr: function() { // custom xhr
+      var myXhr = $.ajaxSettings.xhr();
+      if(myXhr.upload) { // check if upload property exists
+        myXhr.upload.addEventListener('progress', progressHandler, false); // for handling the progress of the upload
+      }
+      return myXhr;
+    },
+    contentType: 'text/plain',
+    //Ajax events
+    beforeSend: beforeSendHandler,
+    success: tokenSuccessHandler, //start actual upload after token is set
+    error: errorHandler,
+    // data
+    headers: {
+      'X-File-Content-Type' : "application/octet-stream",
+      'X-Last-Request' : lastRequest,
+      'X-Csrf-Token' : csrfToken,
+      'X-File-Name' : filename,
+      'X-Upload-Token' : uploadToken,
+      'X-IV' : iv,
+      'X-User-Name' : username
+    },
+    processData: false,
+    cache: false
+  });
+
+}
+
 // Encrypt and upload slices of a file.
-function encryptAndUploadChunks(slices, passphrase) {
+function encryptAndUploadChunks() {
+
+  // get file
+  var file =  $("#file-input")[0].files[0];
+
+  // Slice the chosen file.
+  var slices = sliceFile(file);
+
+  // Get the passphrase chosen by the user.
+  passphrase = $('#passphrase').val();
 
   var encryptedSlices = [];
   var aesEncryptor = CryptoJS.algo.AES.createEncryptor(passphrase, { iv: iv });
@@ -292,88 +361,6 @@ function encryptAndUploadChunks(slices, passphrase) {
       }
     }
   });
-}
-
-/* ============================================================================
-** File upload.
-** ==========================================================================*/
-function uploadFile() {
-  // Get the chosen file.
-  var file =  $("#file-input")[0].files[0];
-
-  // Get the name of the file given by the user...
-  filename = $('#filename').val();
-
-  // ...or just take the existing name.
-  if (filename.length < 1){
-    filename = file.name;
-  }
-
-  if(!file) {
-    return window.alert("Please choose a file.");
-  }
-
-  var username = $('#username').val();
-
-  // set upload token
-  uploadToken = uploadToken();
-
-  // Create the initialization vector.
-  iv = createIV();
-
-  // establish upload session
-  $.ajax({
-
-    url: '/upload',
-    type: 'POST',
-    xhr: function() { // custom xhr
-      var myXhr = $.ajaxSettings.xhr();
-      if(myXhr.upload) { // check if upload property exists
-        myXhr.upload.addEventListener('progress', progressHandler, false); // for handling the progress of the upload
-      }
-      return myXhr;
-    },
-    contentType: 'text/plain',
-    //Ajax events
-    beforeSend: beforeSendHandler,
-    success: tokenSuccessHandler, //start actual upload after token is set
-    error: errorHandler,
-    // data
-    headers: {
-      'X-File-Content-Type' : "application/octet-stream",
-      'X-Last-Request' : lastRequest,
-      'X-Csrf-Token' : csrfToken,
-      'X-File-Name' : filename,
-      'X-Upload-Token' : uploadToken,
-      'X-IV' : iv,
-      'X-User-Name' : username
-    },
-    processData: false,
-    cache: false
-  });
-
-}
-
-// File upload handler.
-function doUpload() {
-  // Get the chosen file.
-  var file =  $("#file-input")[0].files[0];
-
-  // Get the name of the file given by the user...
-  filename = $('#filename').val();
-
-  // ...or just take the existing name.
-  if (filename.length < 1){
-    filename = file.name;
-  }
-  // Slice the chosen file.
-  var slices = sliceFile(file);
-
-  // Get the passphrase chosen by the user.
-  passphrase = $('#passphrase').val();
-
-  // Encrypt and upload the slices using the passphrase and the iv.
-  encryptAndUploadChunks(slices, passphrase);
 }
 
 // File download handler.
@@ -510,7 +497,7 @@ function errorHandler() {
 }
 
 function tokenSuccessHandler(response) {
-  doUpload();
+  encryptAndUploadChunks();
 }
 
 function downloadSuccessHandler(response) {
