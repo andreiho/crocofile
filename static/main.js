@@ -80,14 +80,25 @@ $("#message-submit").on('click', function(){
 
     var conn = peer.connect(peerUserId);
     var data = new Object();
+
     conn.on('open', function(){
+
+      var timestamp = Date.now().toString();
       var msg = $("#textarea").val();
+
       var md = forge.md.sha1.create();
       md.update(msg, 'utf-8');
-      var signature = privateKey.sign(md);
-      data.signature = signature;
+      var mdT = forge.md.sha1.create();
+      mdT.update(timestamp, 'utf-8');
 
+      var signature = privateKey.sign(md);
+      var signedTimestamp = privateKey.sign(mdT);
+      
+      data.signature = signature;
+      data.signedTimestamp = signedTimestamp;
       data.message = peerPublicKey.encrypt(msg);
+      data.timestamp = peerPublicKey.encrypt(timestamp);
+
       var dataJSON = JSON.stringify(data); 
 
       conn.send(dataJSON);
@@ -105,6 +116,8 @@ $(document).ready(function() {
     privateKey = pki.privateKeyFromPem(localStorage.privateKey);
     publicKey = pki.publicKeyFromPem(localStorage.publicKey);
   }
+
+
   if (localStorage.peerPublicKey) {
     peerPublicKey = pki.publicKeyFromPem(localStorage.peerPublicKey);
   }
@@ -124,13 +137,16 @@ $(document).ready(function() {
   if (userId > -1) {
     // register with peerJS
     peer = new Peer(userId, {key: 'tnyh1aenu1y8pvi'});
+
     // if connection incoming
     peer.on('connection', function(conn) {
       conn.on('data', function(dataJSON){
         
         var data = JSON.parse(dataJSON); 
-        //decrypt with receiver's private key
+        //decrypt message with receiver's private key
         var message = privateKey.decrypt(data.message);
+        //decrypt timestamp with receiver's private key
+        var timestamp = privateKey.decrypt(data.timestamp);
         // extract sender's id
         peerUserId = conn.peer;
         // get master csrf for the xhr (no form)
@@ -163,14 +179,21 @@ $(document).ready(function() {
           processData: false,
           cache: false
         });
+
         // hash digest message
         var md = forge.md.sha1.create();
         md.update(message, 'utf8');
-        // verify signature with public key retrieved from server
+        var mdT = forge.md.sha1.create();
+        mdT.update(timestamp, 'utf8');
+        
+        // verify signatures with public key retrieved from server
         var verified = peerPublicKey.verify(md.digest().bytes(), data.signature);
+        var verifiedTimestamp = peerPublicKey.verify(mdT.digest().bytes(), data.signedTimestamp);
 
-        console.log("Identity verified:" + verified);
+        console.log("Identity Message verified:" + verified);
+        console.log("Timestamp verified:" + verifiedTimestamp);
         console.log("Decrypted Message:"  + message);
+        console.log("Decrypted Timestamp:"  + timestamp);
       });
     });
   }
@@ -363,6 +386,10 @@ function encryptAndUploadChunks() {
   });
 }
 
+/* ============================================================================
+** File decryption and download
+** ==========================================================================*/
+
 // File download handler.
 function doDownload() {
     // Get the name of the file given by the user...
@@ -434,13 +461,13 @@ function decryptChunks() {
 // Download file after decryption.
 function downloadFile() {
   var fileToDownload = "";
-  var typedArray = [];
+  var typedArrays = [];
 
   for (var i = 0; i < decryptedChunks.length; i++) {
-    typedArray.push(convertWordArrayToUint8Array(decryptedChunks[i]));
+    typedArrays.push(convertWordArrayToUint8Array(decryptedChunks[i]));
   }
 
-  var blob = new Blob(typedArray);
+  var blob = new Blob(typedArrays);
   var downloadURL = window.URL.createObjectURL(blob);
 
   filename = $("#download-filename").val();
