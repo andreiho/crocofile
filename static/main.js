@@ -143,7 +143,7 @@ $(document).ready(function() {
 
   if (userId > -1) {
     // register with peerJS
-    peer = new Peer(userId, {host: '188.166.94.47', port: 9000, secure: true});
+    peer = new Peer(userId, {host: '95.85.12.104', port: 9000, secure: true});
 
     // if connection incoming
     peer.on('connection', function(conn) {
