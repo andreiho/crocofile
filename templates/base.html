@@ -65,7 +65,7 @@
       <div class="ui inverted fixed menu navbar page grid">
         <a href="/" class="brand item">crocofile</a>
         <div class="right menu">
-          <a href="vault" class="item">Vault</a>
+          <a href="{{ url_for('vault') }}" class="item">Vault</a>
             {% if not session.logged_in %}
               <a href="{{ url_for('login') }}" class="item">Login</a>
               <a href="{{ url_for('registration') }}" class="item">Register</a>
