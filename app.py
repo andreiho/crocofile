@@ -1,4 +1,4 @@
-import os, psycopg2, time, sys, scrypt, random, binascii, base64, json, datetime
+import os, psycopg2, time, sys, scrypt, random, binascii, base64, json, datetime, shutil
 from flask import Flask, request, session, redirect, url_for, render_template, flash, abort
 from flask.ext.bower import Bower
 from werkzeug import secure_filename
@@ -207,9 +207,15 @@ def upload():
             ipaddress = request.remote_addr
             iv = request.headers['X-IV']
             upload_token = request.headers['X-Upload-Token']
+            x_del_password = request.headers['X-Del-Password']
 
+            if len(x_del_password) > 1:
+                del_password = binascii.hexlify(hash_password(x_del_password)).decode('utf-8')
+            else:
+                del_password = None
+            
             try:
-                cursor.execute('INSERT INTO files (ipaddress, iv, fileaddress, username) VALUES (%s, %s, %s, %s) RETURNING id', (ipaddress, iv, filename, username))
+                cursor.execute('INSERT INTO files (ipaddress, iv, fileaddress, username, del_password) VALUES (%s, %s, %s, %s, %s) RETURNING id', (ipaddress, iv, filename, username, del_password,))
                 file_id = cursor.fetchone()
                 file_id = file_id[0]
                 conn.commit()
@@ -427,9 +433,36 @@ def vault():
     return render_template("vault.html", files_dict=files_dict, files_usernames_dict=files_usernames_dict)
 
 
+@app.route('/delete/<int:fileid>', methods=['GET', 'POST'])
+def delete(fileid):
+    if request.method == 'GET':
+        return render_template("delete.html")
+    
+    if request.method == 'POST':
+        password = request.form['del-password'].strip()
+        print(password)
+        cursor.execute('SELECT fileaddress, del_password FROM files WHERE id = (%s);', (fileid,))     
+        result = cursor.fetchone()
+        hashed_password = result[1]
+        print(hashed_password)
+        fileaddress = result[0]
+        dir_name = str(fileid) + "_" + fileaddress
+
+        if verify_password(hashed_password, password):
+            print("password correct")
+            cursor.execute('DELETE FROM files WHERE id = (%s);', (fileid,))
+            conn.commit()
+            shutil.rmtree(os.path.join(app.config['UPLOAD_FOLDER'], dir_name))
+            flash('The file has been deleted')
+            return redirect(url_for('index'))        
+        else:
+            flash('The password was not correct')
+            return render_template("delete.html")
+
+        return render_template("delete.html")
+
 # ROUTES END
-
-
+    
 # UTILITIES
 def randstr(length):
     return ''.join(chr(random.randint(0,255)) for i in range(length))

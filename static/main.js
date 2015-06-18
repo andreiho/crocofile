@@ -264,6 +264,7 @@ function uploadFile() {
   }
 
   var username = $('#username').val();
+  var delPassword = $('#del-password').val();
 
   // set upload token
   uploadToken = uploadToken();
@@ -296,7 +297,8 @@ function uploadFile() {
       'X-File-Name' : filename,
       'X-Upload-Token' : uploadToken,
       'X-IV' : iv,
-      'X-User-Name' : username
+      'X-User-Name' : username,
+      'X-Del-Password' : delPassword
     },
     processData: false,
     cache: false

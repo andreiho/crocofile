@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<div class="ui info message hide" id="is_chrome">
+  <i class="close icon"></i>
+  <div>We recommend you use <b>Google Chrome</b> to download encrypted files.</div>
+</div>
+
+<div class="ui center aligned relaxed segment">
+  <h4 class="ui disabled header">
+    Enter the deletion password to permanently delete the file.
+  </h4>
+
+  <div class="ui hidden divider"></div>
+
+  <div class="ui two column centered grid">
+    <div class="column">
+  
+      <form id="delete-form" class="ui form" action="" method="post">
+        <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
+        <div class="field">
+          <div class="ui action input">
+            <input type="text" id="del-password" name="del-password" placeholder="Paste or type the passphrase here" autofocus>
+            <button type="submit" id="del-submit" class="ui pink button">Delete</button>
+          </div>
+        </div>
+      </form>
+    
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+  if(navigator.userAgent.indexOf("Chrome") == -1 )
+    {
+      document.getElementById("is_chrome").style.display = "block";
+    }
+</script>
+
+{% endblock %}
