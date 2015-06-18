@@ -512,6 +512,14 @@ function successHandler(response) {
     $("#file-link").val(downloadLink);
     $("#file-download").attr("href", "/download?file=" + fileId);
 
+    if ($("#del-password").val()) {
+      $(".delete-wrapper").removeClass("hide");
+
+      // Build the delete link.
+      deleteLink = window.location.host + "/delete/" + fileId;
+      $("#file-delete").val(deleteLink);
+    }
+
     // Show the modal.
     $('#upload-modal').modal('show');
 

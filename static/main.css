@@ -15,7 +15,7 @@
 }
 
 .hide {
-  display: none;
+  display: none !important;
 }
 
 abbr {
@@ -28,6 +28,10 @@ p {
 
 .ui.grid.offset {
   margin-top: 50px;
+}
+
+.delete-wrapper {
+  margin-top: 2rem;
 }
 
 .fixed.launch.button {
