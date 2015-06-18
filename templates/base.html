@@ -104,10 +104,17 @@
 
 </div>
 
+{% if not session.logged_in %}
+  <div class="ui black big launch right attached fixed button">
+    <i class="users icon"></i>
+    <span class="text">Users</span>
+  </div>
+{% else %}
 <div class="ui black big launch right attached fixed button">
   <i class="chat icon"></i>
-  <span class="text">Users</span>
+  <span class="text">Chat</span>
 </div>
+{% endif %}
 
 <div class="ui small modal" id="chat-modal">
   <i class="close icon"></i>
