@@ -109,7 +109,8 @@ $("#message-submit").on('click', function(){
 // Destroy messages when closing the chat window.
 $('#chat-modal').modal({
   onHidden: function() {
-    $("#chat-field").detach();
+    $("#message").empty();
+    $("#chat-field").addClass("hide");
   }
 });
 
@@ -143,7 +144,16 @@ $(document).ready(function() {
 
   if (userId > -1) {
     // register with peerJS
-    peer = new Peer(userId, {host: '95.85.12.104', port: 9000, secure: true});
+    peer = new Peer(userId, {
+      host: '95.85.12.104',
+      port: 9000,
+      secure: true,
+      config: {
+        'iceServers': [
+            { 'url': 'stun:stun.l.google.com:19302' }
+          ]
+      }
+    });
 
     // if connection incoming
     peer.on('connection', function(conn) {
