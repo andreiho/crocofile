@@ -436,30 +436,43 @@ def vault():
 @app.route('/delete/<int:fileid>', methods=['GET', 'POST'])
 def delete(fileid):
     if request.method == 'GET':
-        return render_template("delete.html")
+        try:
+            cursor.execute('SELECT fileaddress, del_password FROM files WHERE id = (%s);', (fileid,))
+            result = cursor.fetchone()
+            if not result:
+                return render_template("delete.html", errorNotFound="The specified file does not exist!")     
+            filename = result[0].split("_")[1]
+            if result[1] == None:        
+                return render_template("delete.html", filename=filename, error="You did not set a deletion password for ")
+            return render_template("delete.html", filename=filename) 
+        except:
+            conn.rollback()
+            return render_template("delete.html", error="There was an unexpected database error. If this keeps happening, please contact us.")
     
     if request.method == 'POST':
         password = request.form['del-password'].strip()
-        print(password)
-        cursor.execute('SELECT fileaddress, del_password FROM files WHERE id = (%s);', (fileid,))     
-        result = cursor.fetchone()
-        hashed_password = result[1]
-        print(hashed_password)
-        fileaddress = result[0]
-        dir_name = str(fileid) + "_" + fileaddress
+        
+        try:  
+            cursor.execute('SELECT fileaddress, del_password FROM files WHERE id = (%s);', (fileid,))     
+            result = cursor.fetchone()
+            hashed_password = result[1]
+            fileaddress = result[0]
+            dir_name = str(fileid) + "_" + fileaddress
 
-        if verify_password(hashed_password, password):
-            print("password correct")
-            cursor.execute('DELETE FROM files WHERE id = (%s);', (fileid,))
-            conn.commit()
-            shutil.rmtree(os.path.join(app.config['UPLOAD_FOLDER'], dir_name))
-            flash('The file has been deleted')
-            return redirect(url_for('index'))        
-        else:
-            flash('The password was not correct')
-            return render_template("delete.html")
+            if verify_password(hashed_password, password):
+                print("password correct")
+                cursor.execute('DELETE FROM files WHERE id = (%s);', (fileid,))
+                conn.commit()
+                shutil.rmtree(os.path.join(app.config['UPLOAD_FOLDER'], dir_name))
+                flash('The file has been deleted')
+                return redirect(url_for('index'))        
+            else:
+                flash('The password was not correct')
+                return render_template("delete.html")
 
-        return render_template("delete.html")
+        except:
+            return render_template("delete.html", error="There was an unexpected error with deleting your file. Please contact us.")            
+       
 
 # ROUTES END
     

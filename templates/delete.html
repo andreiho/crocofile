@@ -9,7 +9,13 @@
 
 <div class="ui center aligned relaxed segment">
   <h4 class="ui disabled header">
-    Enter the deletion password to permanently delete the file.
+  {% if error %}
+    {{ error }} {{ filename }}
+  {% elif errorNotFound %}
+    {{ errorNotFound }}
+  {% else %}
+    Enter the deletion password to permanently delete {{ filename }}
+  {% endif %}
   </h4>
 
   <div class="ui hidden divider"></div>
