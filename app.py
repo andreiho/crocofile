@@ -213,7 +213,7 @@ def upload():
                 del_password = binascii.hexlify(hash_password(x_del_password)).decode('utf-8')
             else:
                 del_password = None
-            
+
             try:
                 cursor.execute('INSERT INTO files (ipaddress, iv, fileaddress, username, del_password) VALUES (%s, %s, %s, %s, %s) RETURNING id', (ipaddress, iv, filename, username, del_password,))
                 file_id = cursor.fetchone()
@@ -440,20 +440,20 @@ def delete(fileid):
             cursor.execute('SELECT fileaddress, del_password FROM files WHERE id = (%s);', (fileid,))
             result = cursor.fetchone()
             if not result:
-                return render_template("delete.html", errorNotFound="The specified file does not exist!")     
+                return render_template("delete.html", errorNotFound="The specified file does not exist!")
             filename = result[0].split("_")[1]
-            if result[1] == None:        
+            if result[1] == None:
                 return render_template("delete.html", filename=filename, error="You did not set a deletion password for ")
-            return render_template("delete.html", filename=filename) 
+            return render_template("delete.html", filename=filename)
         except:
             conn.rollback()
             return render_template("delete.html", error="There was an unexpected database error. If this keeps happening, please contact us.")
-    
+
     if request.method == 'POST':
         password = request.form['del-password'].strip()
-        
-        try:  
-            cursor.execute('SELECT fileaddress, del_password FROM files WHERE id = (%s);', (fileid,))     
+
+        try:
+            cursor.execute('SELECT fileaddress, del_password FROM files WHERE id = (%s);', (fileid,))
             result = cursor.fetchone()
             hashed_password = result[1]
             fileaddress = result[0]
@@ -465,17 +465,17 @@ def delete(fileid):
                 conn.commit()
                 shutil.rmtree(os.path.join(app.config['UPLOAD_FOLDER'], dir_name))
                 flash('The file has been deleted')
-                return redirect(url_for('index'))        
+                return redirect(url_for('index'))
             else:
                 flash('The password was not correct')
                 return render_template("delete.html")
 
         except:
-            return render_template("delete.html", error="There was an unexpected error with deleting your file. Please contact us.")            
-       
+            return render_template("delete.html", error="There was an unexpected error with deleting your file. Please contact us.")
+
 
 # ROUTES END
-    
+
 # UTILITIES
 def randstr(length):
     return ''.join(chr(random.randint(0,255)) for i in range(length))

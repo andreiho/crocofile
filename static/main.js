@@ -106,6 +106,13 @@ $("#message-submit").on('click', function(){
 
 });
 
+// Destroy messages when closing the chat window.
+$('#chat-modal').modal({
+  onHidden: function() {
+    $("#chat-field").detach();
+  }
+});
+
 /* ============================================================================
 ** On page refresh
 ** ==========================================================================*/
