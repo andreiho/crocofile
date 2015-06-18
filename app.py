@@ -133,11 +133,11 @@ def csrf_protect():
             if request.headers['X-Last-Request'] == "true":
                 token = session.pop('_csrf_token', None)
             if not token or token != request.headers['X-Csrf-Token']:
-                abort(403)
+                return render_template('failure.html')
         else:
             token = session.pop('_csrf_token', None)
             if not token or token != request.form.get('_csrf_token'):
-                abort(403)
+                return render_template('failure.html')
 
 def generate_csrf_token():
     if '_csrf_token' not in session:
@@ -471,8 +471,11 @@ def delete(fileid):
                 return render_template("delete.html")
 
         except:
-            return render_template("delete.html", error="There was an unexpected error with deleting your file. Please contact us.")
-
+            return render_template("delete.html", error="There was an unexpected error with deleting your file. Please contact us.")            
+       
+@app.route('/failure')
+def failure():
+    return render_template("failure.html")
 
 # ROUTES END
 
