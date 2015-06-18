@@ -575,18 +575,8 @@ function getPublicKeySuccessHandler(response) {
   else if (peerPublicKey == "failed"){
     alert("An error occured");
   }
-  // else if (!localStorage.acceptedRemoteCert) {
-  //   //alert("You haven't accepted the certificate.");
-  // }
   else {
-    $("#chat-modal").modal('show');
-
-    // Connet to peer.
-    $('#chat-modal').modal({
-      onShow: function() {
-
-      }
-    });
+    $("#chat-modal").modal("show");
   }
 
 }
