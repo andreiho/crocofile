@@ -110,7 +110,7 @@ $("#message-submit").on('click', function(){
 $('#chat-modal').modal({
   onHidden: function() {
     $("#message").empty();
-    $("#chat-field").addClass("hide");
+    $("#chat-field").hide();
   }
 });
 
@@ -213,7 +213,7 @@ $(document).ready(function() {
 
         // Display message to receiver
         $("#chat-username").html(sender);
-        $("#chat-field").removeClass("hide");
+        $("#chat-field").show();
         $("#message").text(message);
         $("#textarea").val("").attr("placeholder", "Reply...");
         $("#message-submit").removeClass("green").addClass("pink");
@@ -533,7 +533,7 @@ function successHandler(response) {
     $("#file-download").attr("href", "/download?file=" + fileId);
 
     if ($("#del-password").val()) {
-      $(".delete-wrapper").removeClass("hide");
+      $(".delete-wrapper").show();
 
       // Build the delete link.
       deleteLink = window.location.host + "/delete/" + fileId;
