@@ -147,14 +147,42 @@ $(document).ready(function() {
 
     // if connection incoming
     peer.on('connection', function(conn) {
+
+      // extract sender's id
+      peerUserId = conn.peer;
+
+      $.ajax({
+        url: '/getPublicKey',
+        type: 'POST',
+        xhr: function() { // custom xhr
+          var myXhr = $.ajaxSettings.xhr();
+          if(myXhr.upload) { // check if upload property exists
+            myXhr.upload.addEventListener('progress', progressHandler, false); // for handling the progress of the upload
+          }
+          return myXhr;
+        },
+        contentType: 'text/plain',
+        //Ajax events
+        //beforeSend: beforeSendHandler,
+        success: getPublicKeySuccessHandler,
+        error: errorHandler,
+        // Form data
+        headers: {
+          'X-File-Content-Type' : "application/octet-stream",
+          'X-Csrf-Token' : csrfToken,
+          'X-User-Id' : peerUserId,
+          'X-Last-Request': lastRequest
+        },
+        processData: false,
+        cache: false
+      });
+
       conn.on('data', function(dataJSON){
         var data = JSON.parse(dataJSON);
         //decrypt message with receiver's private key
         var message = privateKey.decrypt(data.message);
         //decrypt timestamp with receiver's private key
         var timestamp = privateKey.decrypt(data.timestamp);
-        // extract sender's id
-        peerUserId = conn.peer;
         // extract sender's name
         var sender = $(".user-id[data-user-id=" + peerUserId + "]").text();
         // get master csrf for the xhr (no form)
@@ -162,31 +190,6 @@ $(document).ready(function() {
         // keep token valid without page refresh
         lastRequest = "false";
         // AJAX call for public key
-        $.ajax({
-          url: '/getPublicKey',
-          type: 'POST',
-          xhr: function() { // custom xhr
-            var myXhr = $.ajaxSettings.xhr();
-            if(myXhr.upload) { // check if upload property exists
-              myXhr.upload.addEventListener('progress', progressHandler, false); // for handling the progress of the upload
-            }
-            return myXhr;
-          },
-          contentType: 'text/plain',
-          //Ajax events
-          //beforeSend: beforeSendHandler,
-          success: getPublicKeySuccessHandler,
-          error: errorHandler,
-          // Form data
-          headers: {
-            'X-File-Content-Type' : "application/octet-stream",
-            'X-Csrf-Token' : csrfToken,
-            'X-User-Id' : peerUserId,
-            'X-Last-Request': lastRequest
-          },
-          processData: false,
-          cache: false
-        });
 
         // hash digest message
         var md = forge.md.sha1.create();
@@ -572,8 +575,18 @@ function getPublicKeySuccessHandler(response) {
   else if (peerPublicKey == "failed"){
     alert("An error occured");
   }
+  // else if (!localStorage.acceptedRemoteCert) {
+  //   //alert("You haven't accepted the certificate.");
+  // }
   else {
     $("#chat-modal").modal('show');
+
+    // Connet to peer.
+    $('#chat-modal').modal({
+      onShow: function() {
+
+      }
+    });
   }
 
 }
