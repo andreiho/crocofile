@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<div class="ui info message hide" id="is_chrome">
+  <i class="close icon"></i>
+  <div>We recommend you use <b>Google Chrome</b> to download encrypted files.</div>
+</div>
+
+<div class="ui center aligned relaxed segment">
+  <h4 class="ui disabled header">
+    An error occured while complying with your request. Probably you were using you browser's back button and a form was resubmitted. <br> Please navigate to the desired page via our site's navigation bar. 
+  </h4>
+</div>
+
+<script type="text/javascript">
+  if(navigator.userAgent.indexOf("Chrome") == -1 )
+    {
+      document.getElementById("is_chrome").style.display = "block";
+    }
+</script>
+
+{% endblock %}
