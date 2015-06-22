@@ -306,8 +306,6 @@ def logout():
     users_online_dict.pop(userid, None)
     # Add user to offline dictionary
     users_offline_dict[userid] = username
-    # Remove from last online dict
-    users_last_online_dict.pop(userid, None)
 
     session.pop('user_id', None)
     session.pop('logged_in', None)
@@ -358,9 +356,9 @@ def login():
         session['username'] = username
 
         # Add user to online dictionary
-        users_online_dict[str(user._id)] = username
+        users_online_dict[user._id] = username
         # Remove user from offline dictionary
-        users_offline_dict.pop(str(user._id), None)
+        users_offline_dict.pop(user._id, None)
 
         try:
             cursor.execute('UPDATE users SET public_key = (%s) WHERE id = (%s);', (public_key, user._id,))
@@ -486,9 +484,9 @@ def failure():
 def onlineState():
 
     if request.method == 'POST':
-        user_id = request.headers['X-User-Id']
-        users_last_online_dict[user_id] = time.time()
         log_out_users()
+        user_id = request.headers['X-User-Id']
+        users_last_online_dict[int(user_id)] = time.time()
         return json.dumps(users_online_dict)
 
 
@@ -498,12 +496,11 @@ def onlineState():
 def log_out_users(): 
   
     removed = []
-    print("hey: ")
+
     for key in users_last_online_dict:
+
         if users_last_online_dict[key] < time.time() - 60:
-            print(key)
-            print(users_last_online_dict[key])
-            print(time.time())
+            print(users_online_dict)
             username = users_online_dict[key]
             # Remove user from online dictionary
             users_online_dict.pop(key, None)
