@@ -22,7 +22,7 @@ abbr {
   border-bottom: none !important;
 }
 
-p, .sub.header {
+p, .sub.header, .header {
   line-height: 1.66em !important;
 }
 

@@ -79,6 +79,11 @@ $('.sidebar').first()
   .sidebar('attach events', '.launch.button')
 ;
 
+// Show the registration info modal.
+if (window.location.href.indexOf("registration") != -1) {
+  $('#registration-modal').modal('show');
+}
+
 // Messaging
 $("#message-submit").on('click', function(){
 
