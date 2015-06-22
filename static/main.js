@@ -144,7 +144,7 @@ $(document).ready(function() {
 
   if (userId > -1) {
     // send alive signal
-    setInterval( updateOnlineState, 3000 );
+    setInterval( updateOnlineState, 30000 );
 
     // register with peerJS
     peer = new Peer(userId, {

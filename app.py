@@ -500,7 +500,7 @@ def log_out_users():
     removed = []
     print("hey: ")
     for key in users_last_online_dict:
-        if users_last_online_dict[key] < time.time() - 5:
+        if users_last_online_dict[key] < time.time() - 60:
             print(key)
             print(users_last_online_dict[key])
             print(time.time())
