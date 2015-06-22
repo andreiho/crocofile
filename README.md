@@ -23,13 +23,13 @@ psql crocofile
 **Create the users table:**
 
 ```
-CREATE TABLE users (id SERIAL PRIMARY KEY, username varchar(30) UNIQUE not null, password varchar(600) not null, timestamp date not null default CURRENT_DATE);
+CREATE TABLE users (id SERIAL PRIMARY KEY, username varchar(30) UNIQUE not null, password varchar(600) not null, timestamp date not null default CURRENT_DATE, public_key varchar(460) not null, secret varchar(16));
 ```
 
 **Create the files table:**
 
 ```
-CREATE TABLE files (id SERIAL PRIMARY KEY, ipaddress inet not null, iv varchar(32) not null, fileaddress varchar(90), username varchar(30));
+CREATE TABLE files (id SERIAL PRIMARY KEY, ipaddress inet not null, iv varchar(32) not null, fileaddress varchar(90), username varchar(30), del_password varchar(3000));
 ```
 
 **Add these lines to your environment:**
