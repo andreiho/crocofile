@@ -1,4 +1,4 @@
-import os, psycopg2, time, sys, scrypt, random, binascii, base64, json, datetime, shutil
+import os, psycopg2, time, sys, scrypt, random, binascii, base64, json, datetime, shutil, threading
 from flask import Flask, request, session, redirect, url_for, render_template, flash, abort
 from flask.ext.bower import Bower
 from werkzeug import secure_filename
@@ -27,6 +27,8 @@ users_dict = {}
 users_offline_dict = {}
 # online users get loaded before the app gets started (on user table changes)
 users_online_dict = {}
+# indicates the timestamp at last XHR call 
+users_last_online_dict = {}
 
 # files get loaded before the app gets started (on file table changes)
 files_dict = {}
@@ -300,10 +302,12 @@ def logout():
     except:
         conn.rollback()
 
-    # Add user to online dictionary
+    # Remove user to online dictionary
     users_online_dict.pop(userid, None)
-    # Remove user from offline dictionary
+    # Add user to offline dictionary
     users_offline_dict[userid] = username
+    # Remove from last online dict
+    users_last_online_dict.pop(userid, None)
 
     session.pop('user_id', None)
     session.pop('logged_in', None)
@@ -354,9 +358,9 @@ def login():
         session['username'] = username
 
         # Add user to online dictionary
-        users_online_dict[user._id] = username
+        users_online_dict[str(user._id)] = username
         # Remove user from offline dictionary
-        users_offline_dict.pop(user._id, None)
+        users_offline_dict.pop(str(user._id), None)
 
         try:
             cursor.execute('UPDATE users SET public_key = (%s) WHERE id = (%s);', (public_key, user._id,))
@@ -477,9 +481,40 @@ def delete(fileid):
 def failure():
     return render_template("failure.html")
 
+
+@app.route('/onlineState', methods=['GET', 'POST'])
+def onlineState():
+
+    if request.method == 'POST':
+        user_id = request.headers['X-User-Id']
+        users_last_online_dict[user_id] = time.time()
+        log_out_users()
+        return json.dumps(users_online_dict)
+
+
 # ROUTES END
 
 # UTILITIES
+def log_out_users(): 
+  
+    removed = []
+    print("hey: ")
+    for key in users_last_online_dict:
+        if users_last_online_dict[key] < time.time() - 5:
+            print(key)
+            print(users_last_online_dict[key])
+            print(time.time())
+            username = users_online_dict[key]
+            # Remove user from online dictionary
+            users_online_dict.pop(key, None)
+            # Add user to offline dictionary
+            users_offline_dict[key] = username
+
+            removed.append(key)
+
+    for key in removed:
+        users_last_online_dict.pop(key, None)
+
 def randstr(length):
     return ''.join(chr(random.randint(0,255)) for i in range(length))
 

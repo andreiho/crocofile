@@ -143,6 +143,9 @@ $(document).ready(function() {
   userId = parseInt($("#logged-in").html());
 
   if (userId > -1) {
+    // send alive signal
+    setInterval( updateOnlineState, 3000 );
+
     // register with peerJS
     peer = new Peer(userId, {
       host: '95.85.12.104',
@@ -752,4 +755,38 @@ function convertWordArrayToUint8Array(wordArray) {
 // generate an RSA key pair
 function generateKeyPair() {
   keyPair = rsa.generateKeyPair({bits: 2048, e: 0x10001});
+}
+
+function updateOnlineState() {
+  csrfToken = $("#master_csrf_token").val(); 
+  lastRequest = "false";  
+  $.ajax({
+    url: '/onlineState',
+    type: 'POST',
+    xhr: function() { // custom xhr
+      var myXhr = $.ajaxSettings.xhr();
+      if(myXhr.upload) { // check if upload property exists
+        myXhr.upload.addEventListener('progress', progressHandler, false); // for handling the progress of the upload
+      }
+      return myXhr;
+    },
+    contentType: 'text/plain',
+    //Ajax events
+    //beforeSend: beforeSendHandler,
+    success: onlineStateHandler,
+    error: errorHandler,
+    // Form data
+    headers: {
+      'X-File-Content-Type' : "application/octet-stream",
+      'X-Csrf-Token' : csrfToken,
+      'X-User-Id' : userId,
+      'X-Last-Request': lastRequest
+    },
+    processData: false,
+    cache: false
+  });
+}
+
+function onlineStateHandler(response) {
+  console.log(response);
 }

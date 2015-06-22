@@ -1,0 +1,200 @@
+--
+-- PostgreSQL database dump
+--
+
+SET statement_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+
+--
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+SET search_path = public, pg_catalog;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: files; Type: TABLE; Schema: public; Owner: jagenau; Tablespace: 
+--
+
+CREATE TABLE files (
+    id integer NOT NULL,
+    ipaddress inet NOT NULL,
+    iv character varying(32) NOT NULL,
+    fileaddress character varying(90),
+    username character varying(30),
+    del_password character varying(3000)
+);
+
+
+ALTER TABLE public.files OWNER TO jagenau;
+
+--
+-- Name: files_id_seq; Type: SEQUENCE; Schema: public; Owner: jagenau
+--
+
+CREATE SEQUENCE files_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.files_id_seq OWNER TO jagenau;
+
+--
+-- Name: files_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: jagenau
+--
+
+ALTER SEQUENCE files_id_seq OWNED BY files.id;
+
+
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: jagenau; Tablespace: 
+--
+
+CREATE TABLE users (
+    id integer NOT NULL,
+    username character varying(30) NOT NULL,
+    password character varying(600) NOT NULL,
+    "timestamp" date DEFAULT ('now'::text)::date NOT NULL,
+    public_key character varying(460)
+);
+
+
+ALTER TABLE public.users OWNER TO jagenau;
+
+--
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: jagenau
+--
+
+CREATE SEQUENCE users_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.users_id_seq OWNER TO jagenau;
+
+--
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: jagenau
+--
+
+ALTER SEQUENCE users_id_seq OWNED BY users.id;
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: jagenau
+--
+
+ALTER TABLE ONLY files ALTER COLUMN id SET DEFAULT nextval('files_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: jagenau
+--
+
+ALTER TABLE ONLY users ALTER COLUMN id SET DEFAULT nextval('users_id_seq'::regclass);
+
+
+--
+-- Data for Name: files; Type: TABLE DATA; Schema: public; Owner: jagenau
+--
+
+COPY files (id, ipaddress, iv, fileaddress, username, del_password) FROM stdin;
+2	127.0.0.1	11b86067235b8a4517fabcaeb326915d	1434628420_key.png		736372797074001000000008000000014db4fa66cd0a180773c95e102569f064900e70cb69f1fbf437c2b03c9aed0152d383a89347c6483eb0bf3bbb790054f23b9cf46b9f7332cf618e51b43e1db578b9c03b572def500e56e8aaa5dcc5fda4e4f13e283334f214c22a20785be8f7a8a001146420217aca6da2db0ee35610f3a0f213b68e09b762b9d6eb5bca79d4c3d1cdfca281971277f308de2216808c0ec3f69fcb787cd6ffec8a63d2e75098f1aa785edac49ee332c6e8a1b6f90d7c85a2e6747405e473c097bf166b2828c37a8ed43bbcb872bb83849b162b0d48d45c
+3	127.0.0.1	26e38b18efd6944e9ca60274f54f953d	1434628566_key.png		736372797074000f0000000800000001f4b08036fc1679eee3c06454041826de275a494bdf7d37ce7c8f9c6a7c8f25b06a18b7983af7da2c0f6054b586bffc1e64212da358639415ac0eebc07dc8cac4d97695bff7fa6707e0ededef9a0ce5d6802e84067406c35176ae8b80dc6ba13a228493ffc65efc5e7a2c32417b52385789cc30e27872cbf1207d0e9a97771e79e6923a6c21acedb14dd7e7b382fc193bb589b50654761969352201f7ed7780d8f7e5df0dadb406ace03dd14fce68c7d3e36925519220471e013ba708a2ab647299141dfa495be15ed56f67a15845f3cc029e87ed
+4	127.0.0.1	a98b86da04854ab77dcbe121907810ae	1434631816_02699_STD_Tomaten-Tasche.jpg		736372797074000f00000008000000012a5f36c2196d5d62f2de7c3999e8a642fdeae318e808009ad44543adfbc9cc9a388f790cf4774745e58929e75091990505214e3dfed3e0316ecd56d5c4bde0fda242663b126b800c5bdb247a8af99c326b7792291d4916766bb62ab4c5395d7ba63791e16a1710fae908bec7329999ca14cf5227394243ce28dc57341fd201700176fd40490e14bcc37de590dec8dad78e84c77d9e352e17b8cffc154880a300fd5edbfce9b622495abb95eff3bfff2d8b5251db18a4386d36a66e4d61fc7c59767d1f8f82ac37e4704b
+5	127.0.0.1	d0a4e00cbca923eb800469c64d9fd679	1434640702_koala.jpg		736372797074001000000008000000011a7684e040b28be8273bdc9e6ff24ecaaa2acdd49686bb97bfa6af79056ef16e5ad064e9466fc2c4d385affb76141cb2320fe66dab87962a2e61c468663a680f7c0d97fa9f6436f7e0ad0c122ce6f6bdc0b25c3bca17757c7c9c8fb504908dc774907f130a1a10a12098ed29661e6f5b6f66c57a1e8e11ca527c3b3a3799dce0a72381762d2587898b0ecf671a923f537622cf181a000e0faad02e1e8ec44edef37752f43b0f21f6cb0eddb6409cab2d606bca803889962f141c25dae108605a602d7c1e10accde04e536f06710018
+6	127.0.0.1	b23e936eb43dd9c8513f263254a8455c	1434640726_basic-upload-icon.png	newAccount	\N
+7	127.0.0.1	3aab60522f6fba75cbd6805227002ad0	1434662472_key.png	blablup	736372797074000f0000000800000001811144a362eeeb6ce22060b1b3a84a05efdf6a205755e7a1e5994728f72f51bfad6df6d60a1a92fd45d45798c6a0b0d8ec4511a2de5d3a2ba0e04038d5822c6ac4060c756392081192011fc075ff7b57e641c0b0d4a84a4acec74a2d6db2c83d04e30b9d9dcc3e702714c1e0e67995e19dd918036ff566a05e9d99e06654e6d0e0ecd338c2d54f3c1dc7067fb461b94ce6c28448c1c33a065b90904f5a29f240b7d9e42b794faff57e10b6f1045f98f093f1c31d1324f2fb3183a623fb6604b2e65e8f9b6bba7ee180527178eadf34670d673d3aead416
+8	127.0.0.1	448bba639a2a34cfcce7820b5faba44d	1434662716_hello.png	bla	736372797074000e000000080000000165897e472b56bf273d1c533a0146a3a680510f90d9c13df2c5b51793fbbe1d41f1583f9e0da0e6a72a236cf497c59fdd984c29f2a5f77d3eef0651aecfc5dd581985e808c6b8e638829697099a27dd6c32cfd84b92adfcf6fc123f05ae7ae18bd20be8258754b4d253cc93fcb5587d8d9ab6872baf67fbc59ca86f1a50f4e8769eb091561300f01835fab9a9f07dfc1ff55959d605f984ab62e0cca96daef9e91644fe6c28e44d86be3293e5eff972040ee91ea629ec902483191a8d21615f4f685f0f83d510b98f
+9	127.0.0.1	c8e4e7d3e6852055a26a95a304f72218	1434663070_key.png		736372797074000f00000008000000015084bf29afef6f45ddbd0d88f713bb6311aef5482acdb3166c3b8aa67349ef2ba68d60fd3b0eb93f79b9b5acf3286e127378ef34bc915456b7c15a095a048c83c2841c716afa41368f8a9cad7dbb186f8fde8a8a5f79f87df87c33ed5a22f2ca85f3ba8b76ceeb9bf01b5a7646ce31293361ca45f11612ca404515538d6413da11a92d806a721280b9cbb1dfa1d910bc91b2a2d48dc2e285d96a88a1a77a0a3ff1a2e4c5f6e7fd8484f47d3dfa1c7b70be5efd01e7035f04f593a029bd709fd40dcab3f1ef22a74163085a547cef4ec6a2e6442d8f
+\.
+
+
+--
+-- Name: files_id_seq; Type: SEQUENCE SET; Schema: public; Owner: jagenau
+--
+
+SELECT pg_catalog.setval('files_id_seq', 9, true);
+
+
+--
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: jagenau
+--
+
+COPY users (id, username, password, "timestamp", public_key) FROM stdin;
+1	jagenau	736372797074000f0000000800000001082a049c17197b1d460b28f03bc8cfa00f938ddfe8b4e6ceb2ea156a4082d4d83e9cb9e1af582e6c29d207872d5b2abd08bbf85cea316ae5dcc4c0aa5ac4f4b03b16455219a61b066ebf2a07e067a24e15b40f95e3f7a3eaa222479f9bfcb096c11381c2dbaf5622fd40f1c0f4c03c3f212f47cd6feca271a4d6ee6a59048c4e9b147ec3c9bf89d7107433d5844d72a0932b855ca334087168c3863bd87f415e9ba8c2add7dcfbed912610257eec0bead731d058f7e28eba4b68e13f664257b12f01695b8f13c8190e	2015-06-02	\N
+6	radical	736372797074000f0000000800000001cd323a46389c6841d1cf1b12a1c7f6a0e9d6c815506c341488ea6b07c53a45ea5e897a7cf916212e7afd5ca5d4e198900445bde6f66f7cef61040f118abd6a2106623370851a53dde41502d5de2994ed6d661537b1fd9ec41df082a95c7259be0b7e560fdfee4d7a3e756a01b104048e522f21f7842295584cb0c4d31d42e8ff207bb36bcb260ed7eb5a08cc557f5739b2af7be0f6e510fbc7e4da379eb630c06d1b3f2b599363a659218da2db217130a49dfe18f141b05cc02995c954716cb8e0a04ab4283c3df0754fa9c317c225b3a129d0	2015-06-02	\N
+7	newUser	73637279707400100000000800000001b98f7efad0b081947a1103cbfffe02feb6a3afadd2a86c2d7eaa9258e208ac1d66e1b15cb69e3c54413e87ca784fc5ea9f3e3845746cb567a085084af99f3a611203ea7a8a7d3675beef4925d93c410fa0834d514d39769d3d0d9ad5018e6c1ada9fb33e15032b6ca53930eba6742c4dac43f73c6b479d5a6c6908793d877f03331b21cdb743c6ff1fc52b667ee7dc2da5cb65e44d6e7f8c853181fddd41932c6613a9a71d9671f99dd47a2af60fc1f4dbe7ee949cfac8123db0ff4a5c8fee3259da76207f360cc3088d28	2015-06-10	\N
+9	soFuckingNew	736372797074000f0000000800000001428e3f86fc0baf017468e395dd7c4d6d41987f3d683e96812bb23ce05827d815102dcdcfb5580d78ccc7530018ada0d99c5ef9dcaec2fad8bbba7680c59f9301cfe3f2ee8a04aa6a734fd9b730af4b71aafebe6b80fd2f3234d411172d3787a9597cb582091f8faae027dc0c18e5a6ceff26ab222257286ced1ab45979962e857d105753cf5c9081438ebb86a050becd01a226a25dad2c62917d32f72c7eefcd91d30b1fa5bad22faedbc607cb57770e48ae389c82298fad9fcef64a51c46bf5c495a56f3cdbcdee53ba4f916b339d82	2015-06-16	-----BEGIN PUBLIC KEY-----\r\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAszLNDhCrsP0QoqgLYcnG\r\nOgIayInTDQ8LxmTJOD1O0ikVYuSUTtK5AUqRlyFYoNQ+Pf/mq0/8OkmfPPxGyJsO\r\nkM69WujQEGEKCS56eYXSzK5LNC1MkWCzmgWGo+g/fMXJ4ShQ2+HaVuRYlhpoe5u0\r\nzvJ6eUhuZgQ1WHm+xe3WTEvmLVapCLujV/K8bDFg4ATXwfbYa0SJpRgtSAPnTVWA\r\neyrSV0HabXjMBa2LKOBijF/D/vI129mylbYbarwSjMKE9/qDxQ6NB42gQvQW+lCx\r\nj8u5jmmhU+E3svaEyA+Moxv/BDPbJdJuWcAbFRUTNQSBzO6sXfOUL3Rw80diqoSU\r\naQIDAQAB\r\n-----END PUBLIC KEY-----
+10	Peer	736372797074000f00000008000000016d54dbd209625c1253a951a024194d847dea9e395043719b66fa725e60bfa0b292677c5644351cc92d8719cfdbb6361db6ccc0baee61b2cd737328ed21ddf4d50349373a972be338bb0b9f99b79927eb5cc4728ecaab34f1ef432acc6fb96b6e443dfe1edf780f880695e1736c4212002fc7735566eb751bc61234fcf45fd8cada4d22feb38f959d0281902a3d1d6fc41e70223eedfcf03c37f7b00e82b940728d5f2f82f406e5ef1564571de1acacc6b2b0d38e314e650cfd2e7cbf384627a73068f97317	2015-06-16	\N
+8	newAccount	736372797074000f000000080000000182536dd5d3661ecbac0fb9628b1c45743ad78b4cf893330cf0d4c6c2a6aefea607da5ac4d87b1901b4015be00851504987e5f743de6f82cf5b381ed440d058a61c9984cd26fbfd25c2272307761baf45b989ac11a6653139a5d7316892fcf27881fc33517dbf8410e13f0171601479ac0a5085490746d4c75b05e6a7635b05fb655e7fcd11fd07719431e70e9b8e7581d51efe5101609d94efa6d116a91964671cdf87811d81923beca3ff916f4514e577cfc1c1ecd060bf931d950b9fda25410f8b1cc3fca1bd9f01ff1830ce6497e7cf781fd56875	2015-06-15	\N
+11	Peer2	736372797074000f0000000800000001a02435fa6db2d26ac87cd9906a9a7a7dd355e83028ce25afd3b07d135e85c12b8f527b97dba475a081b2c95a06e1e252dae63df48ef5340fbb17f5fd036c032397db59a95128748a88c021451c5c5ea889ea87286a20c21f2b067683f41b0bb52c9155a959d05af5d2ce78db1096deca0b80a90021b55b913494fb663f4e9e25b111bb5828c8ee6af96bd7fc76dfaa57657acceec8fc3b1b2f6b0799208d68b25aa26152bba5b9d019c927f7f4134183a541203edb0fe66fd50ffce5c1429aa2a5f272772dff2bf691b16dad2a3fa3f88e28b3	2015-06-18	-----BEGIN PUBLIC KEY-----\r\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtL3FGwtpYIPd74G6Se3q\r\nng2PTNEkuvWr89qXLnoQY6TExueTSFOhewFdOYQGq2LwMyDndjuW0GqJoJvR+OmU\r\nzr9umPgNE0WCgsd1g8R55pUckGOdzX9KntfE3T9tBP+4Vip8SiOARidOgVLF9Knj\r\n0K+kTFdTGJ9FXUChYaTc7oFnzVhVgkimrx/4Oyntq2bktSTzSvg6fUr+VV4C9P/G\r\nEJrPUkn15rU3+DYttghV8dwxPPPjbkiFhVR/Pwutt6BUvZ7SU4ft7p5mX+pp8CSL\r\nqgf2uawEcPjiueC1g96gpvCVBDrJz6pGtnjjwb63sM+on9TjMyRPoJMUhtV62DEO\r\ndQIDAQAB\r\n-----END PUBLIC KEY-----
+\.
+
+
+--
+-- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: jagenau
+--
+
+SELECT pg_catalog.setval('users_id_seq', 11, true);
+
+
+--
+-- Name: files_pkey; Type: CONSTRAINT; Schema: public; Owner: jagenau; Tablespace: 
+--
+
+ALTER TABLE ONLY files
+    ADD CONSTRAINT files_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: jagenau; Tablespace: 
+--
+
+ALTER TABLE ONLY users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: users_username_key; Type: CONSTRAINT; Schema: public; Owner: jagenau; Tablespace: 
+--
+
+ALTER TABLE ONLY users
+    ADD CONSTRAINT users_username_key UNIQUE (username);
+
+
+--
+-- Name: public; Type: ACL; Schema: -; Owner: postgres
+--
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON SCHEMA public FROM postgres;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+--
+-- PostgreSQL database dump complete
+--
+
