@@ -486,8 +486,6 @@ def qrcode():
 
         # render qrcode for authenticator
         url = pyqrcode.create(user.get_totp_uri())
-        print(url)
-
         stream = BytesIO()
         url.svg(stream, scale=10)
 
