@@ -22,8 +22,8 @@ abbr {
   border-bottom: none !important;
 }
 
-p {
-  line-height: 1.66em;
+p, .sub.header {
+  line-height: 1.66em !important;
 }
 
 .ui.grid.offset {

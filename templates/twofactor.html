@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<div class="ui center aligned relaxed form segment">
+  <div class="ui two column centered grid">
+    <div class="center aligned column">
+      <h4 class="ui dividing header">2-Step Verification Setup</h4>
+      <p>
+        Help keep the bad guys out of your account by using both your password and your phone.
+        To get started, scan the QR code on this page with your Google Authenticator app or the like.
+      </p>
+      <p>
+        If you leave this page without scanning the code, your account will become permanently inaccessible.
+      </p>
+      <div class="ui horizontal divider">
+        Did you scan the code?
+      </div>
+      <a href="{{ url_for('login') }}" class="ui large pink button">Yes, take me to login</a>
+    </div>
+    <div class="center aligned column">
+      <img id="qrcode" src="{{ url_for('qrcode') }}" width="300">
+    </div>
+  </div>
+</div>
+
+{% endblock %}

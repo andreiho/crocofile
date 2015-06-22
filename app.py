@@ -1,7 +1,8 @@
-import os, psycopg2, time, sys, scrypt, random, binascii, base64, json, datetime, shutil
+import os, psycopg2, time, sys, scrypt, random, binascii, base64, json, datetime, shutil, onetimepass, pyqrcode
 from flask import Flask, request, session, redirect, url_for, render_template, flash, abort
 from flask.ext.bower import Bower
 from werkzeug import secure_filename
+from io import BytesIO
 
 app = Flask(__name__)
 
@@ -42,7 +43,7 @@ wrong_username_timeout = {}
 # USER CONTEXT CLASS
 
 class UserContext():
-    def __init__(self, id, username, password):
+    def __init__(self, id, username, password, secret):
         assert type(id) == int
         assert type(username) == str
         assert type(password) == str
@@ -50,12 +51,17 @@ class UserContext():
         self._id = id
         self._username = username
         self._password = password
+        self._secret = secret
 
         # blocked is a mapping an IP (string) -> counter (integer)
         self._blocked = {}
 
         # blocked Timeout is a mapping an IP (string) -> timestamp of timeout over
         self._blocked_timeout = {}
+
+        if self._secret is None:
+            # generate a random secret
+            self._secret = base64.b32encode(os.urandom(10)).decode('utf-8')
 
     def is_blocked(self, ip):
         assert type(ip) == str
@@ -86,6 +92,13 @@ class UserContext():
             self._blocked_timeout[ip] = 0
 
         return result
+
+    def get_totp_uri(self):
+        return 'otpauth://totp/crocofile:{0}?secret={1}&issuer=crocofile' \
+            .format(self._username, self._secret)
+
+    def verify_totp(self, token):
+        return onetimepass.valid_totp(token, self._secret)
 
 # Login attempts with wrong username
 
@@ -324,6 +337,7 @@ def login():
 
         username = request.form['username'].strip()
         password = request.form['password'].strip()
+        code = request.form['code'].strip()
         public_key = request.form['public-key'].strip()
         ip = request.remote_addr
         username_attempts = 0
@@ -336,7 +350,7 @@ def login():
 
         if not user:
             add_to_wrong_username(ip)
-            error = "Wrong username or password."
+            error = "Wrong username, password or verification code."
             fieldError = "error"
             return render_template("login.html", error=error, fieldError=fieldError)
 
@@ -346,7 +360,11 @@ def login():
 
         if not user.login(password, ip):
             user.failed_login_attempt(ip)
-            error = "Wrong username or password."
+            error = "Wrong username, password or verification code."
+            return render_template('login.html', error=error)
+
+        if not user.verify_totp(code):
+            error = "Wrong username, password or verification code."
             return render_template('login.html', error=error)
 
         session['logged_in'] = True
@@ -420,13 +438,68 @@ def registration():
         except:
             conn.rollback()
             return render_template('registration.html', someError="Something went wrong. Try again or tell us, if you are sweet?")
+
         conn.commit()
 
         load_all_users()
-        flash('You have been registered.')
-        return redirect(url_for('login'))
+
+        # redirect to the two-factor auth page, passing username in session
+        session['username'] = username
+        return redirect(url_for('two_factor_setup'))
 
     return render_template('registration.html', error=error)
+
+@app.route('/twofactor')
+def two_factor_setup():
+    if 'username' not in session:
+        return redirect(url_for('index'))
+
+    try:
+        cursor.execute('SELECT username FROM users WHERE username = (%s);', (session['username'],))
+        user = cursor.fetchone()
+
+        if user is None:
+            return redirect(url_for('index'))
+
+        # since this page contains the sensitive qrcode,
+        # make sure the browser does not cache it
+        return render_template('twofactor.html'), 200, {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'}
+
+    except:
+        conn.rollback()
+        return render_template("registration.html", someError="There was an unexpected error. If this keeps happening, please contact us.")
+
+@app.route('/qrcode')
+def qrcode():
+    if 'username' not in session:
+        abort(404)
+
+    try:
+        username = session['username']
+        user = fetch_user_by_username(username)
+
+        if user is None:
+            abort(404)
+
+        # render qrcode for authenticator
+        url = pyqrcode.create(user.get_totp_uri())
+        print(url)
+
+        stream = BytesIO()
+        url.svg(stream, scale=10)
+
+        return stream.getvalue(), 200, {
+            'Content-Type': 'image/svg+xml',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'}
+
+    except:
+        conn.rollback()
+        return render_template("registration.html", someError="There was an unexpected error. If this keeps happening, please contact us.")
 
 @app.route('/vault')
 def vault():
@@ -471,8 +544,8 @@ def delete(fileid):
                 return render_template("delete.html")
 
         except:
-            return render_template("delete.html", error="There was an unexpected error with deleting your file. Please contact us.")            
-       
+            return render_template("delete.html", error="There was an unexpected error with deleting your file. Please contact us.")
+
 @app.route('/failure')
 def failure():
     return render_template("failure.html")
@@ -498,10 +571,10 @@ def verify_password(hashed_password, guessed_password, maxtime=0.5):
 
 def load_all_users():
     global users_dict
-    cursor.execute('SELECT id, username, password FROM users')
+    cursor.execute('SELECT id, username, password, secret FROM users')
 
     for row in cursor.fetchall():
-        users_dict[row[1]] = UserContext(row[0], row[1], row[2])
+        users_dict[row[1]] = UserContext(row[0], row[1], row[2], row[3])
         users_offline_dict[row[0]] = row[1]
 
 def load_all_files():

@@ -8,7 +8,7 @@
       <h4 class="ui dividing header">Register</h4>
 
       <form class="ui fluid form" action="{{ url_for('registration') }}" method="post">
-	<input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+	      <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
 
         <div class="field {{ userError }}">
           <div class="ui left icon input">

@@ -66,6 +66,14 @@ $('#username')
   })
 ;
 
+// Show a tip when focusing on the verification code input.
+$('#code')
+  .popup({
+    on: 'focus',
+    position : 'right center',
+  })
+;
+
 // Trigger the user sidebar.
 $('.sidebar').first()
   .sidebar('attach events', '.launch.button')
