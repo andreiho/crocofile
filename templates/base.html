@@ -117,7 +117,7 @@
 {% endif %}
 
 <div class="ui small modal" id="chat-modal">
-  <i class="close icon"></i>
+  <i id="dummy" class="close icon"></i>
 
   <div class="header" id="chat-header">
     <span id="chat-username"></span>:
@@ -126,6 +126,7 @@
   <div class="content">
 
     <div class="ui message hide" id="chat-field">
+      <div id="error" class="header"></div>
       <p id="message"></p>
     </div>
 

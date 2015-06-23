@@ -501,10 +501,11 @@ def log_out_users():
 
         if users_last_online_dict[key] < time.time() - 60:
             print(users_online_dict)
-            username = users_online_dict[key]
-            # Remove user from online dictionary
-            users_online_dict.pop(key, None)
-            # Add user to offline dictionary
+            if key in users_online_dict:
+                username = users_online_dict[key]
+                # Remove user from online dictionary
+                users_online_dict.pop(key, None)
+                # Add user to offline dictionary
             users_offline_dict[key] = username
 
             removed.append(key)

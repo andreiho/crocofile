@@ -24,6 +24,7 @@ var rsa = pki.rsa;
 var peerPublicKey;
 var peerUserId;
 var userId;
+var onlineStateInterval;
 
 // Bindings.
 $('#passphrase').val(generatePass()); // Generate random passphrase on page load.
@@ -96,7 +97,6 @@ $("#message-submit").on('click', function(){
       data.timestamp = peerPublicKey.encrypt(timestamp);
 
       var dataJSON = JSON.stringify(data);
-
       conn.send(dataJSON);
 
       $("#textarea").val("");
@@ -144,7 +144,7 @@ $(document).ready(function() {
 
   if (userId > -1) {
     // send alive signal
-    setInterval( updateOnlineState, 30000 );
+    onlineStateInterval = setInterval( updateOnlineState, 3000 );
 
     // register with peerJS
     peer = new Peer(userId, {
@@ -191,11 +191,16 @@ $(document).ready(function() {
       });
 
       conn.on('data', function(dataJSON){
+        var error = "";
+
         var data = JSON.parse(dataJSON);
+
         //decrypt message with receiver's private key
         var message = privateKey.decrypt(data.message);
+
         //decrypt timestamp with receiver's private key
-        var timestamp = privateKey.decrypt(data.timestamp);
+        var timestamp = parseInt(privateKey.decrypt(data.timestamp));
+
         // extract sender's name
         var sender = $(".user-id[data-user-id=" + peerUserId + "]").text();
         // get master csrf for the xhr (no form)
@@ -211,18 +216,49 @@ $(document).ready(function() {
         mdT.update(timestamp, 'utf8');
 
         // verify signatures with public key retrieved from server
-        var verified = peerPublicKey.verify(md.digest().bytes(), data.signature);
-        var verifiedTimestamp = peerPublicKey.verify(mdT.digest().bytes(), data.signedTimestamp);
+        var verified, verifiedTimestamp;
+        
+        try {
+          verifiedTimestamp = peerPublicKey.verify(mdT.digest().bytes(), data.signedTimestamp);
+        }
+        catch (e){
+          error = "This message's timestamp could not be verfied";
+          console.log(e);
+        }
+        var validRange = Date.now() - 180000;
+        if (timestamp < validRange || timestamp > Date.now() || !verifiedTimestamp){
+          error = "This message's timestamp could not be verfied";
+        }
 
+        try {
+          verified = peerPublicKey.verify(md.digest().bytes(), data.signature);
+        }
+        catch (e){
+          error = "The sender's identity could not be verfied";
+          console.log(e);
+        }
+        if (!verified) {
+          error = "The sender's identity could not be verfied";
+        }
         // Display message to receiver
+        if (error != "") {
+          $("#chat-field").addClass("yellow");
+        }
+        else {
+          $("#chat-field").removeClass("yellow");  
+        }
         $("#chat-username").html(sender);
         $("#chat-field").show();
         $("#message").text(message);
+        $("#error").text(error);
         $("#textarea").val("").attr("placeholder", "Reply...");
         $("#message-submit").removeClass("green").addClass("pink");
         $("#message-submit i").removeClass("check").addClass("send");
       });
     });
+  }
+  else{
+    clearInterval(onlineStateInterval);
   }
 
   if (href.indexOf('?') > -1) {
@@ -788,5 +824,5 @@ function updateOnlineState() {
 }
 
 function onlineStateHandler(response) {
-  console.log(response);
+  //console.log(response);
 }
