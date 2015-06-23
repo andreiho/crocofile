@@ -306,6 +306,8 @@ def logout():
     users_online_dict.pop(userid, None)
     # Add user to offline dictionary
     users_offline_dict[userid] = username
+    if userid in users_last_online_dict:
+        users_last_online_dict.pop(userid, None)
 
     session.pop('user_id', None)
     session.pop('logged_in', None)
@@ -507,8 +509,10 @@ def log_out_users():
                 users_online_dict.pop(key, None)
                 # Add user to offline dictionary
                 users_offline_dict[key] = username
-                
+
                 removed.append(key)
+            else:
+                users_last_online_dict.pop(key, None)
 
     for key in removed:
         users_last_online_dict.pop(key, None)
