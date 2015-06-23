@@ -484,6 +484,9 @@ def qrcode():
         if user is None:
             abort(404)
 
+        # for added security, remove username from session
+        session.pop('username', None)
+
         # render qrcode for authenticator
         url = pyqrcode.create(user.get_totp_uri())
         stream = BytesIO()
