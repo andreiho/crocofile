@@ -506,9 +506,9 @@ def log_out_users():
                 # Remove user from online dictionary
                 users_online_dict.pop(key, None)
                 # Add user to offline dictionary
-            users_offline_dict[key] = username
-
-            removed.append(key)
+                users_offline_dict[key] = username
+                
+                removed.append(key)
 
     for key in removed:
         users_last_online_dict.pop(key, None)
